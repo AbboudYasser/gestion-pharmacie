@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import FournisseurForm from './FournisseurForm'; // استيراد مكون النموذج
+import FournisseurForm from './FournisseurForm';
 import './App.css';
 
 function App() {
   const [fournisseurs, setFournisseurs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isAdding, setIsAdding] = useState(false); // حالة لإظهار/إخفاء النموذج
+  const [isAdding, setIsAdding] = useState(false); 
 
-  // دالة جلب البيانات (تبقى كما هي)
   async function getFournisseurs() {
-    // ... (الكود من الخطوة السابقة لم يتغير)
     try {
         setLoading(true);
         const { data, error } = await supabase.from('fournisseur').select('*');
@@ -29,24 +27,20 @@ function App() {
     getFournisseurs();
   }, []);
 
-  // دالة لإضافة مورد جديد (هذا هو المنطق الجديد)
   const handleAddFournisseur = async (nouveauFournisseur) => {
     try {
-      // إرسال البيانات إلى جدول 'fournisseur' في Supabase
       const { data, error } = await supabase
         .from('fournisseur')
         .insert([nouveauFournisseur])
-        .select(); // .select() لإعادة البيانات التي تم إدراجها
+        .select(); 
 
       if (error) {
-        throw error; // التعامل مع أخطاء Supabase
+        throw error;
       }
 
       if (data) {
-        // تحديث الواجهة فوراً بإضافة المورد الجديد إلى القائمة (تفصيل مهم)
-        // هذا يمنع الحاجة إلى إعادة تحميل كل البيانات من قاعدة البيانات
         setFournisseurs((prevFournisseurs) => [...prevFournisseurs, data[0]]);
-        setIsAdding(false); // إخفاء النموذج بعد الإضافة الناجحة
+        setIsAdding(false);
       }
     } catch (error) {
       console.error("Erreur lors de l'ajout du fournisseur:", error);
@@ -54,7 +48,6 @@ function App() {
     }
   };
 
-  // عرض واجهة المستخدم
   if (loading) return <div>Chargement des données...</div>;
   if (error) return <div>Erreur: {error}</div>;
 

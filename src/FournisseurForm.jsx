@@ -1,33 +1,26 @@
 import { useState } from 'react';
 
-// `onAddFournisseur` هي دالة ستأتي من المكون الأب (App.jsx)
-// `setIsAdding` هي دالة للتحكم في إظهار/إخفاء النموذج
+
 function FournisseurForm({ onAddFournisseur, setIsAdding }) {
-  // حالة لكل حقل في النموذج لإدارة قيمته
   const [codFour, setCodFour] = useState('');
   const [nomFour, setNomFour] = useState('');
   const [adresFour, setAdresFour] = useState('');
   const [numTelFour, setNumTelFour] = useState('');
 
-  // دالة للتعامل مع إرسال النموذج
   const handleSubmit = (event) => {
-    event.preventDefault(); // منع التحديث التلقائي للصفحة
-
-    // التحقق من المدخلات (تفصيل مهم)
+    event.preventDefault();
     if (!codFour || !nomFour) {
       alert('الرجاء إدخال رمز واسم المورد على الأقل.');
-      return; // إيقاف التنفيذ إذا كانت الحقول المطلوبة فارغة
+      return; 
     }
 
-    // إنشاء كائن المورد الجديد
     const nouveauFournisseur = {
-      cod_four: parseInt(codFour), // تحويل الرمز إلى رقم
+      cod_four: parseInt(codFour),
       nom_four: nomFour,
       adres_four: adresFour,
       num_tel_four: numTelFour,
     };
 
-    // استدعاء الدالة من المكون الأب وتمرير البيانات الجديدة
     onAddFournisseur(nouveauFournisseur);
   };
 
