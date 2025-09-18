@@ -47,6 +47,26 @@ function App() {
       alert(`فشل في إضافة المورد: ${error.message}`);
     }
   };
+const handleDelete = async (id) => {
+  if (window.confirm("هل أنت متأكد أنك تريد حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء.")) {
+    try {
+      const { error } = await supabase
+        .from('fournisseur')
+        .delete()
+        .match({ id: id });
+
+      if (error) {
+        throw error;
+      }
+
+      setFournisseurs(fournisseurs.filter((f) => f.id !== id));
+
+    } catch (error) {
+      console.error("Erreur lors de la suppression du fournisseur:", error);
+      alert(`فشل في حذف المورد: ${error.message}`);
+    }
+  }
+};
 
   if (loading) return <div>Chargement des données...</div>;
   if (error) return <div>Erreur: {error}</div>;
@@ -65,26 +85,35 @@ function App() {
         {isAdding ? (
           <FournisseurForm onAddFournisseur={handleAddFournisseur} setIsAdding={setIsAdding} />
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>الرمز</th>
-                <th>اسم المورد</th>
-                <th>العنوان</th>
-                <th>الهاتف</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fournisseurs.map((fournisseur) => (
-                <tr key={fournisseur.id}>
-                  <td>{fournisseur.cod_four}</td>
-                  <td>{fournisseur.nom_four}</td>
-                  <td>{fournisseur.adres_four}</td>
-                  <td>{fournisseur.num_tel_four}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+<table>
+  <thead>
+    <tr>
+      <th>الرمز</th>
+      <th>اسم المورد</th>
+      <th>العنوان</th>
+      <th>الهاتف</th>
+      <th>إجراءات</th> {}
+    </tr>
+  </thead>
+  <tbody>
+    {fournisseurs.map((fournisseur) => (
+      <tr key={fournisseur.id}>
+        <td>{fournisseur.cod_four}</td>
+        <td>{fournisseur.nom_four}</td>
+        <td>{fournisseur.adres_four}</td>
+        <td>{fournisseur.num_tel_four}</td>
+        <td> {}
+          <button
+            className="btn btn-danger"
+            onClick={() => handleDelete(fournisseur.id)} 
+          >
+            حذف
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         )}
       </main>
     </div>

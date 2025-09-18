@@ -139,6 +139,15 @@ tbody tr:hover {
   background-color: #5a6268;
 }
 
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
 /* Add button in header */
 header .btn {
   float: left;
