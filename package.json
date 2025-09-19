@@ -1,0 +1,80 @@
+{
+  "name": "pharmacy-management-system",
+  "version": "1.0.0",
+  "description": "نظام شامل لإدارة صيدليات المستشفيات الحكومية في الجزائر",
+  "main": "frontend/index.html",
+  "scripts": {
+    "start": "cd frontend && python -m http.server 3000",
+    "start:backend": "cd backend && python main.py",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start\"",
+    "build": "npm run build:frontend",
+    "build:frontend": "mkdir -p dist && cp -r frontend/* dist/",
+    "deploy": "npm run build && gh-pages -d dist",
+    "test": "echo \"No tests specified\" && exit 0",
+    "lint": "echo \"No linting configured\" && exit 0",
+    "clean": "rm -rf dist node_modules",
+    "setup": "npm install && pip install -r backend/requirements.txt",
+    "docs": "echo \"Opening documentation...\" && open README.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/pharmacy-management-system.git"
+  },
+  "keywords": [
+    "pharmacy",
+    "management",
+    "hospital",
+    "healthcare",
+    "arabic",
+    "algeria",
+    "flask",
+    "javascript",
+    "firebase"
+  ],
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://github.com/yourusername"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/pharmacy-management-system/issues"
+  },
+  "homepage": "https://yourusername.github.io/pharmacy-management-system",
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "gh-pages": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0",
+    "python": ">=3.8.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "config": {
+    "frontend_port": 3000,
+    "backend_port": 5000
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "files": [
+    "frontend/",
+    "backend/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/yourusername"
+  },
+  "private": false
+}
