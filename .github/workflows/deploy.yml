@@ -76,14 +76,13 @@ jobs:
         # إنشاء مجلد البناء
         mkdir -p build
         
-        # نسخ الصفحة الرئيسية
-        cp frontend/index.html build/
+        # نسخ محتويات مجلد الواجهة الأمامية مباشرة إلى مجلد البناء
+        # هذا يضمن أن index.html و CSS/JS سيكونان في جذر الموقع المنشور
+        cp -r frontend/* build/
         
-        # نسخ مجلد الواجهة الأمامية
-        cp -r frontend build/
-        
-        # نسخ الملفات المهمة
-        cp README.md build/
+        # نسخ الملفات المهمة الأخرى إلى مجلد البناء (مثل README.md و docs إذا كانت موجودة في الجذر)
+        # تأكد من أن هذه الملفات موجودة في جذر المستودع إذا كنت تريد نسخها
+        cp README.md build/ 2>/dev/null || echo "No README.md found"
         cp -r docs build/ 2>/dev/null || echo "No docs folder found"
         
         # إنشاء ملف .nojekyll لتجنب معالجة Jekyll
@@ -103,13 +102,13 @@ jobs:
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           <url>
             <loc>https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/</loc>
-            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <lastmod>$(date -u +%Y-%m-%d )</lastmod>
             <changefreq>weekly</changefreq>
             <priority>1.0</priority>
           </url>
           <url>
-            <loc>https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/frontend/login.html</loc>
-            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <loc>https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/login.html</loc>
+            <lastmod>$(date -u +%Y-%m-%d )</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.8</priority>
           </url>
@@ -123,22 +122,27 @@ jobs:
       run: |
         echo "🔧 Configuring for production environment..."
         
-        # تحديث config.js للإنتاج
-        if [ -f build/frontend/js/config.js ]; then
+        # تحديث config.js للإنتاج (المسار أصبح build/js/config.js)
+        if [ -f build/js/config.js ]; then
           # استبدال عنوان API للإنتاج
-          sed -i 's|http://localhost:5000/api|https://qjh9iecend13.manus.space/api|g' build/frontend/js/config.js
+          sed -i 's|http://localhost:5000/api|https://qjh9iecend13.manus.space/api|g' build/js/config.js
           
           # تفعيل البيانات الوهمية في الإنتاج
-          sed -i 's|MOCK_DATA: false|MOCK_DATA: true|g' build/frontend/js/config.js
+          sed -i 's|MOCK_DATA: false|MOCK_DATA: true|g' build/js/config.js
           
           echo "✅ Production configuration applied!"
         fi
         
-        # تحديث الروابط في index.html إذا لزم الأمر
+        # تحديث الروابط في index.html إذا لزم الأمر (هذه الخطوة قد لا تكون ضرورية بعد التغيير أعلاه )
+        # بما أن كل شيء أصبح في الجذر، فإن الروابط مثل href="css/style.css" يجب أن تعمل
+        # إذا كانت ملفات HTML تستخدم مسارات مثل "frontend/css/style.css"، فيجب تعديلها لتصبح "css/style.css"
+        # أو يمكننا إضافة sed هنا لتعديلها تلقائياً
         if [ -f build/index.html ]; then
-          # تحديث الروابط النسبية
-          sed -i 's|href="frontend/|href="./frontend/|g' build/index.html
-          sed -i 's|src="frontend/|src="./frontend/|g' build/index.html
+          # تحديث الروابط النسبية (مثال: تحويل frontend/css/ إلى css/)
+          sed -i 's|href="frontend/css/|href="css/|g' build/index.html
+          sed -i 's|src="frontend/js/|src="js/|g' build/index.html
+          sed -i 's|href="frontend/|href="./|g' build/index.html # لأي روابط أخرى تبدأ بـ frontend/
+          sed -i 's|src="frontend/|src="./|g' build/index.html # لأي روابط أخرى تبدأ بـ frontend/
           
           echo "✅ Links updated for GitHub Pages!"
         fi
@@ -148,13 +152,13 @@ jobs:
       run: |
         echo "🔍 Validating build..."
         
-        # التحقق من وجود الملفات المطلوبة
+        # التحقق من وجود الملفات المطلوبة (تعديل المسارات هنا لتناسب البنية الجديدة)
         required_files=(
           "build/index.html"
-          "build/frontend/login.html"
-          "build/frontend/js/config.js"
-          "build/frontend/js/api.js"
-          "build/frontend/css/style.css"
+          "build/login.html"
+          "build/js/config.js"
+          "build/js/api.js"
+          "build/css/style.css"
         )
         
         for file in "${required_files[@]}"; do
@@ -204,8 +208,8 @@ jobs:
         echo ""
         echo "🔗 Quick Links:"
         echo "   • Home: ${{ steps.deployment.outputs.page_url }}"
-        echo "   • Login: ${{ steps.deployment.outputs.page_url }}frontend/login.html"
-        echo "   • Dashboard: ${{ steps.deployment.outputs.page_url }}frontend/dashboard.html"
+        echo "   • Login: ${{ steps.deployment.outputs.page_url }}login.html"
+        echo "   • Dashboard: ${{ steps.deployment.outputs.page_url }}dashboard.html"
 
   # مهمة اختبار ما بعد النشر (اختيارية)
   post-deploy-test:
@@ -236,7 +240,7 @@ jobs:
         
         # اختبار صفحة تسجيل الدخول
         echo "Testing login page..."
-        if curl -f -s "$SITE_URL/frontend/login.html" > /dev/null; then
+        if curl -f -s "$SITE_URL/login.html" > /dev/null; then
           echo "✅ Login page is accessible"
         else
           echo "❌ Login page is not accessible"
@@ -245,7 +249,7 @@ jobs:
         
         echo "🎉 All tests passed!"
 
-  # مهمة إشعار النجاح (اختيارية)
+  # مهمة إشعار النجاح (اختيارية )
   notify:
     name: 📢 Notify Success
     needs: [deploy, post-deploy-test]
