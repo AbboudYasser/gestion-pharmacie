@@ -77,7 +77,7 @@ jobs:
         mkdir -p build
         
         # نسخ الصفحة الرئيسية
-        cp index.html build/
+        cp frontend/index.html build/
         
         # نسخ مجلد الواجهة الأمامية
         cp -r frontend build/
