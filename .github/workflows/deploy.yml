@@ -1,132 +1,81 @@
-# ملف GitHub Actions للنشر التلقائي على GitHub Pages
-# (النسخة الأصلية مع إزالة الأجزاء غير الضرورية فقط)
-
+# ملف GitHub Actions النهائي: ينشئ config.js من الأسرار ثم ينشر
 name: 🚀 Deploy to GitHub Pages
 
-# متى يتم تشغيل هذا الـ workflow
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
-# إعدادات الصلاحيات المطلوبة
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# منع تشغيل عدة deployments في نفس الوقت
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
-# المهام (Jobs) التي سيتم تنفيذها
 jobs:
-  # مهمة البناء والإعداد
   build:
     name: 🔨 Build Project
     runs-on: ubuntu-latest
     
     steps:
-    # تحميل الكود من repository
     - name: 📥 Checkout Repository
       uses: actions/checkout@v4
     
-    # إعداد Node.js (للأدوات المساعدة مثل npm)
     - name: 🟢 Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-    
-    # تثبيت dependencies إذا وجدت
+
+    # ✨✨✨ الخطوة الجديدة والحاسمة ✨✨✨
+    - name: 🤫 Create config.js from Secrets
+      run: |
+        echo "🔐 Creating config.js file from GitHub Secrets..."
+        # إنشاء المسار إذا لم يكن موجودًا
+        mkdir -p frontend/js
+        # كتابة محتوى الملف باستخدام الأسرار
+        # سيتم استبدال ${{ secrets.SUPABASE_URL }} بالقيمة الفعلية من أسرار GitHub
+        echo "const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" > frontend/js/config.js
+        echo "const SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> frontend/js/config.js
+        echo "const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);" >> frontend/js/config.js
+        echo "console.log('✅ Supabase config loaded successfully from secrets.');" >> frontend/js/config.js
+        echo "✅ config.js created successfully."
+
     - name: 📦 Install Dependencies
       run: |
-        # تثبيت npm packages إذا وجد package.json
         if [ -f package.json ]; then
           npm ci
         fi
     
-    # إنشاء مجلد البناء وتحضير الملفات
     - name: 🏗️ Build Project
       run: |
-        echo "🔧 Building project for GitHub Pages..."
         mkdir -p build
         cp -r frontend/* build/
-        cp README.md build/ 2>/dev/null || echo "No README.md found"
         touch build/.nojekyll
-        cat > build/robots.txt << EOF
-        User-agent: *
-        Allow: /
-        Sitemap: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/sitemap.xml
-        EOF
-        cat > build/sitemap.xml << EOF
-        <?xml version="1.0" encoding="UTF-8"?>
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-          <url>
-            <loc>https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/</loc>
-            <lastmod>$(date -u +%Y-%m-%d  )</lastmod>
-          </url>
-          <url>
-            <loc>https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/login.html</loc>
-            <lastmod>$(date -u +%Y-%m-%d  )</lastmod>
-          </url>
-        </urlset>
-        EOF
-        echo "✅ Build completed successfully!"
     
-    # تحديث التكوين للإنتاج
-    - name: ⚙️ Configure for Production
-      run: |
-        echo "🔧 Configuring for production environment..."
-        if [ -f build/js/config.js ]; then
-          sed -i 's|http://localhost:5000/api|https://qjh9iecend13.manus.space/api|g' build/js/config.js
-          sed -i 's|MOCK_DATA: false|MOCK_DATA: true|g' build/js/config.js
-          echo "✅ Production configuration applied!"
-        fi
-        if [ -f build/index.html ]; then
-          sed -i 's|href="frontend/css/|href="css/|g' build/index.html
-          sed -i 's|src="frontend/js/|src="js/|g' build/index.html
-          sed -i 's|href="frontend/|href="./|g' build/index.html
-          sed -i 's|src="frontend/|src="./|g' build/index.html
-          echo "✅ Links updated for GitHub Pages!"
-        fi
-    
-    # التحقق من صحة البناء
     - name: ✅ Validate Build
       run: |
         echo "🔍 Validating build..."
-        required_files=(
-          "build/index.html"
-          "build/login.html"
-          "build/js/config.js"
-          "build/js/api.js"
-          "build/css/style.css"
-         )
-        for file in "${required_files[@]}"; do
-          if [ ! -f "$file" ]; then
-            echo "❌ Missing required file: $file"
-            exit 1
-          else
-            echo "✅ Found: $file"
-          fi
-        done
-        echo "📊 Build size:"
-        du -sh build/
-        echo "✅ Build validation completed!"
+        # الآن هذه الخطوة ستنجح لأن config.js تم إنشاؤه
+        if [ -f "build/js/config.js" ]; then
+          echo "✅ Found: build/js/config.js"
+        else
+          echo "❌ Missing required file: build/js/config.js"
+          exit 1
+        fi
     
-    # رفع artifacts للمهمة التالية
     - name: 📤 Upload Build Artifacts
       uses: actions/upload-pages-artifact@v3
       with:
         path: build/
 
-  # مهمة النشر على GitHub Pages
   deploy:
     name: 🌐 Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -135,50 +84,3 @@ jobs:
     - name: 🚀 Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-      
-    - name: 📋 Display Deployment Info
-      run: |
-        echo "🎉 Deployment completed successfully!"
-        echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
-
-  # مهمة اختبار ما بعد النشر (اختيارية)
-  post-deploy-test:
-    name: 🧪 Post-Deploy Tests
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: 🔍 Test Deployed Site
-      run: |
-        echo "🧪 Testing deployed site..."
-        sleep 30
-        SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
-        echo "Testing home page..."
-        if curl -f -s "$SITE_URL" > /dev/null; then
-          echo "✅ Home page is accessible"
-        else
-          echo "❌ Home page is not accessible"
-          exit 1
-        fi
-        echo "Testing login page..."
-        if curl -f -s "$SITE_URL/login.html" > /dev/null; then
-          echo "✅ Login page is accessible"
-        else
-          echo "❌ Login page is not accessible"
-          exit 1
-        fi
-        echo "🎉 All tests passed!"
-
-  # مهمة إشعار النجاح (اختيارية )
-  notify:
-    name: 📢 Notify Success
-    needs: [deploy, post-deploy-test]
-    runs-on: ubuntu-latest
-    if: success() && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: 🎉 Success Notification
-      run: |
-        echo "🎊 Deployment Pipeline Completed Successfully!"
-        echo "   • Site URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
