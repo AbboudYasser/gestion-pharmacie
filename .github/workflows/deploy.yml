@@ -1,4 +1,4 @@
-# ملف GitHub Actions النهائي: ينشئ config.js من الأسرار ثم ينشر
+# ملف GitHub Actions النهائي: ينشئ config.js ثم يبني المشروع بشكل صحيح
 name: 🚀 Deploy to GitHub Pages
 
 on:
@@ -16,71 +16,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: 🔨 Build Project
+  # دمج كل شيء في مهمة واحدة لتجنب الأخطاء
+  build-and-deploy:
+    name: 🔨 Build and Deploy
     runs-on: ubuntu-latest
-    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
     steps:
+    # 1. تحميل الكود
     - name: 📥 Checkout Repository
       uses: actions/checkout@v4
-    
-    - name: 🟢 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
 
-    # ✨✨✨ الخطوة الجديدة والحاسمة ✨✨✨
+    # 2. إنشاء ملف config.js من الأسرار
     - name: 🤫 Create config.js from Secrets
       run: |
         echo "🔐 Creating config.js file from GitHub Secrets..."
-        # إنشاء المسار إذا لم يكن موجودًا
         mkdir -p frontend/js
         # كتابة محتوى الملف باستخدام الأسرار
-        # سيتم استبدال ${{ secrets.SUPABASE_URL }} بالقيمة الفعلية من أسرار GitHub
         echo "const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" > frontend/js/config.js
         echo "const SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> frontend/js/config.js
         echo "const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);" >> frontend/js/config.js
         echo "console.log('✅ Supabase config loaded successfully from secrets.');" >> frontend/js/config.js
         echo "✅ config.js created successfully."
 
-    - name: 📦 Install Dependencies
+    # 3. إعداد GitHub Pages (خطوة تحضيرية)
+    - name: ⚙️ Setup Pages
+      uses: actions/configure-pages@v5
+
+    # 4. بناء الموقع: نسخ محتويات frontend إلى مجلد النشر
+    # ✨✨✨ هذه هي الخطوة الحاسمة التي أعيدت ✨✨✨
+    - name: 🏗️ Build Project by copying frontend contents
       run: |
-        if [ -f package.json ]; then
-          npm ci
-        fi
-    
-    - name: 🏗️ Build Project
-      run: |
-        mkdir -p build
-        cp -r frontend/* build/
-        touch build/.nojekyll
-    
-    - name: ✅ Validate Build
-      run: |
-        echo "🔍 Validating build..."
-        # الآن هذه الخطوة ستنجح لأن config.js تم إنشاؤه
-        if [ -f "build/js/config.js" ]; then
-          echo "✅ Found: build/js/config.js"
-        else
-          echo "❌ Missing required file: build/js/config.js"
-          exit 1
-        fi
-    
-    - name: 📤 Upload Build Artifacts
+        # إنشاء مجلد النشر الافتراضي الذي تبحث عنه GitHub Pages
+        mkdir -p _site
+        
+        # نسخ كل محتويات مجلد frontend (بما في ذلك config.js الذي تم إنشاؤه) إلى مجلد النشر
+        cp -r frontend/* _site/
+        
+        # إنشاء ملف .nojekyll لمنع GitHub من معالجة الموقع كمدونة Jekyll
+        touch _site/.nojekyll
+
+    # 5. رفع ناتج البناء كـ "artifact" لـ GitHub Pages
+    - name: 📤 Upload Artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: build/
+        path: './_site'
 
-  deploy:
-    name: 🌐 Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
-    steps:
+    # 6. نشر الموقع على GitHub Pages
     - name: 🚀 Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
