@@ -35,8 +35,20 @@ jobs:
         echo "🔐 Creating config.js file from GitHub Secrets..."
         mkdir -p frontend/js
         # كتابة محتوى الملف باستخدام الأسرار
+            - name: 🤫 Create config.js from Secrets
+      run: |
+        # إنشاء مجلد js إذا لم يكن موجودًا
+        mkdir -p frontend/js
+
+        # كتابة الأسرار في ملف config.js
+        # لاحظ أننا نستخدم secrets.* لكل شيء الآن
         echo "const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" > frontend/js/config.js
         echo "const SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> frontend/js/config.js
+        echo "const SUPABASE_PROJECT_ID = '${{ secrets.SUPABASE_PROJECT_ID }}';" >> frontend/js/config.js
+        echo "const EMAILJS_SERVICE_ID = '${{ secrets.EMAILJS_SERVICE_ID }}';" >> frontend/js/config.js
+        echo "const EMAILJS_TEMPLATE_ID = '${{ secrets.EMAILJS_TEMPLATE_ID }}';" >> frontend/js/config.js
+        echo "const EMAILJS_PUBLIC_KEY = '${{ secrets.EMAILJS_PUBLIC_KEY }}';" >> frontend/js/config.js
+
         echo "const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);" >> frontend/js/config.js
         echo "console.log('✅ Supabase config loaded successfully from secrets.');" >> frontend/js/config.js
         echo "✅ config.js created successfully."
