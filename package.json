@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "glob": "^11.0.3",
+    "strip-comments": "^2.0.1",
+    "supabase": "^2.40.7"
+  }
+}
