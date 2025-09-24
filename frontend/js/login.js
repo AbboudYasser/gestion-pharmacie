@@ -1,10 +1,17 @@
 // /frontend/js/login.js (النسخة النهائية والمحصّنة)
 
 document.addEventListener("DOMContentLoaded", function() {
-    if (typeof emailjs !== 'undefined') {
-        emailjs.init("nR-eq2QOrW8I_ZUmu");
+    // التحقق من وجود المتغيرات الأساسية عند تحميل الصفحة
+    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
+        console.error("Supabase config is missing! Check config.js and deployment secrets.");
+        showAlert("خطأ فادح في الإعدادات. لا يمكن الاتصال بالخادم.", "danger");
+        return; // إيقاف كل شيء إذا كانت الإعدادات غير موجودة
+    }
+
+    if (typeof emailjs !== 'undefined' && typeof EMAILJS_PUBLIC_KEY !== 'undefined') {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
     } else {
-        console.error("EmailJS SDK not loaded!");
+        console.error("EmailJS SDK or Public Key not loaded!");
         showAlert("خطأ فادح: لم يتم تحميل خدمة إرسال البريد.", "danger");
     }
 
@@ -39,7 +46,7 @@ async function handleForgotPasswordRequest(e) {
         generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
         const templateParams = { to_email: email, to_name: fullName, otp_code: generatedOTP };
         
-        await emailjs.send('service_q792eyc', 'template_g3osree', templateParams);
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
         
         showAlert(`تم إرسال رمز التحقق إلى ${email}.`, "success");
         updateView('setupPassword');
@@ -73,7 +80,6 @@ async function handleSetupPassword(e) {
         });
 
         if (error) {
-            // تحقق من وجود رسالة خطأ مخصصة من الخادم
             const errorMessage = data && data.error ? data.error : error.message;
             throw new Error(errorMessage);
         }
