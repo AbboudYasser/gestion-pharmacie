@@ -1,5 +1,5 @@
 // supabase/functions/api/index.ts
-// هذه هي البوابة الوحيدة والآمنة لقاعدة بياناتك
+// النسخة النهائية والمصححة
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -11,15 +11,14 @@ serve(async (req ) => {
   if (optionsResponse) return optionsResponse;
 
   try {
-    const { action, payload } = await req.json(); // نستقبل "الإجراء" و "البيانات"
+    const { action, payload } = await req.json();
 
-    // --- طبقة الأمان: استخدام مفتاح المدير السري ---
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // --- الموزع الذكي: يوجه الطلب بناءً على "الإجراء" ---
+    // --- الموزع الذكي: switch واحد فقط لجميع الإجراءات ---
     switch (action) {
       case "LOGIN_USER": {
         const { email, password } = payload;
@@ -27,9 +26,9 @@ serve(async (req ) => {
 
         const { data: user, error } = await supabaseAdmin.from("users").select("id, password, role").eq("email", email).single();
         if (error || !user) throw new Error("بيانات الاعتماد غير صحيحة.");
-        if (user.password === null) throw new Error("هذا الحساب لم يقم بتعيين كلمة مرور بعد.");
+        if (user.password === null) throw new Error("هذا الحساب لم يقم بتعيين كلمة مرور بعد. استخدم 'كلمة مرور جديدة؟'.");
 
-        const passwordMatch = bcrypt.compareSync(password, user.password);
+        const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) throw new Error("بيانات الاعتماد غير صحيحة.");
 
         return new Response(JSON.stringify({ message: "تم تسجيل الدخول بنجاح!", userId: user.id, userRole: user.role }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -40,53 +39,26 @@ serve(async (req ) => {
         if (!email || !newPassword) throw new Error("البريد الإلكتروني وكلمة المرور الجديدة مطلوبان.");
         if (newPassword.length < 8) throw new Error("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
 
-        const hashedPassword = bcrypt.hashSync(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         const { error } = await supabaseAdmin.from("users").update({ password: hashedPassword }).eq("email", email);
-        if (error) throw new Error("فشل تحديث كلمة المرور.");
+        if (error) throw new Error("فشل تحديث كلمة المرور: " + error.message);
 
         return new Response(JSON.stringify({ message: "تم تعيين كلمة المرور بنجاح!" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-// supabase/functions/api/index.ts
-// ... (بداية الملف و case "LOGIN_USER" و "SETUP_PASSWORD" تبقى كما هي)
 
-    // --- الموزع الذكي: يوجه الطلب بناءً على "الإجراء" ---
-    switch (action) {
-      case "LOGIN_USER": {
-        // ... (الكود من الرد السابق)
-      }
-
-      case "SETUP_PASSWORD": {
-        // ... (الكود من الرد السابق)
-      }
-
-      // ✨✨✨ الإضافة الجديدة هنا ✨✨✨
       case "CHECK_USER_EXISTS": {
         const { email } = payload;
         if (!email) throw new Error("البريد الإلكتروني مطلوب.");
 
         const { data: user, error } = await supabaseAdmin.from("users").select("prenom, nom, password").eq("email", email).single();
         if (error || !user) throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
-        if (user.password !== null) throw new Error("هذا الحساب لديه كلمة مرور بالفعل.");
+        if (user.password !== null) throw new Error("هذا الحساب لديه كلمة مرور بالفعل. يمكنك تسجيل الدخول مباشرة.");
 
-        // إذا نجح كل شيء، أرسل البيانات اللازمة لإرسال البريد الإلكتروني
         return new Response(JSON.stringify({ prenom: user.prenom, nom: user.nom }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
       default:
-        throw new Error("Invalid action.");
-    }
-// ... (باقي الملف)
-
-
-      // ✨ يمكنك إضافة إجراءات مستقبلية هنا بسهولة ✨
-      // case "GET_PRODUCTS": {
-      //   const { data, error } = await supabaseAdmin.from("products").select("*");
-      //   if (error) throw error;
-      //   return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      // }
-
-      default:
-        throw new Error("Invalid action.");
+        throw new Error(`الإجراء '${action}' غير معروف أو غير صالح.`);
     }
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
