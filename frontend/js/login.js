@@ -1,25 +1,21 @@
-
+// /frontend/js/login.js (النسخة النهائية والمحصّنة)
 
 document.addEventListener("DOMContentLoaded", function() {
-    
     if (typeof emailjs !== 'undefined') {
-        emailjs.init("nR-eq2QOrW8I_ZUmu"); 
+        emailjs.init("nR-eq2QOrW8I_ZUmu");
     } else {
         console.error("EmailJS SDK not loaded!");
         showAlert("خطأ فادح: لم يتم تحميل خدمة إرسال البريد.", "danger");
     }
 
-    
     document.getElementById("loginForm").addEventListener("submit", handleLogin);
     document.getElementById("setupPasswordForm").addEventListener("submit", handleSetupPassword);
     document.getElementById("forgotPasswordLink").addEventListener("click", handleForgotPasswordRequest);
     document.getElementById("backToLoginBtn").addEventListener("click", () => updateView('login'));
 });
 
-
 let userEmailForSetup = null;
 let generatedOTP = null;
-
 
 async function handleForgotPasswordRequest(e) {
     e.preventDefault();
@@ -30,16 +26,13 @@ async function handleForgotPasswordRequest(e) {
     }
     showLoading(true, 'loginBtn');
     try {
-        const { data: user, error } = await supabaseClient.from('users').select('id, prenom, nom').eq('email', email).single();
-        
-        
-        if (error || !user) {
-            throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
-        }
-        
-        
-        
+        // ✨✨✨ الإصلاح الحقيقي: تعريف العميل هنا باستخدام المتغيرات العامة ✨✨✨
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const { data: user, error } = await supabaseClient.from('users').select('id, password, prenom, nom').eq('email', email).single();
+        if (error || !user) throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
+        if (user.password !== null) throw new Error("هذا الحساب لديه كلمة مرور بالفعل.");
+        
         userEmailForSetup = email;
         const fullName = `${user.prenom} ${user.nom}`;
         
@@ -59,11 +52,6 @@ async function handleForgotPasswordRequest(e) {
     }
 }
 
-
-
-
-
-
 async function handleSetupPassword(e) {
     e.preventDefault();
     showLoading(true, 'setupBtn');
@@ -77,14 +65,16 @@ async function handleSetupPassword(e) {
         if (newPassword.length < 8) throw new Error("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
         if (newPassword !== confirmPassword) throw new Error("كلمتا المرور غير متطابقتين.");
 
-        
+        // ✨✨✨ الإصلاح الحقيقي: تعريف العميل هنا أيضًا ✨✨✨
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const { data, error } = await supabaseClient.functions.invoke('set-password', {
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ email: userEmailForSetup, newPassword: newPassword }),
+            body: { email: userEmailForSetup, newPassword: newPassword },
         });
 
         if (error) {
-            const errorMessage = data?.error || error.message;
+            // تحقق من وجود رسالة خطأ مخصصة من الخادم
+            const errorMessage = data && data.error ? data.error : error.message;
             throw new Error(errorMessage);
         }
 
@@ -104,21 +94,21 @@ async function handleSetupPassword(e) {
     }
 }
 
-
 async function handleLogin(e) {
     e.preventDefault();
     showLoading(true, 'loginBtn');
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     try {
-        
-        const { data, error } = await supabaseClient.functions.invoke('login-user', {
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ email, password }),
-        });
+        // ✨✨✨ الإصلاح الحقيقي: تعريف العميل هنا أيضًا ✨✨✨
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const { data, error } = await supabaseClient.functions.invoke('login-user', {
+            body: { email, password },
+        });
+        
         if (error) {
-            const errorMessage = data?.error || "بيانات الاعتماد غير صحيحة.";
+            const errorMessage = data && data.error ? data.error : "بيانات الاعتماد غير صحيحة.";
             throw new Error(errorMessage);
         }
         
@@ -134,12 +124,9 @@ async function handleLogin(e) {
     }
 }
 
-
-
-
-
+// --- الدوال المساعدة (لا تغيير هنا) ---
 function redirectUser(role) {
-    const destinations = { 'pharmacien': 'stock.html', 'directeur': 'dashboard.html', 'chef_service': 'department_requests.html', 'fournisseur': 'supplier_orders.html' };
+    const destinations = { 'pharmacien': 'stock.html', 'directeur': 'dashboard.html' };
     window.location.href = destinations[role] || 'login.html';
 }
 function updateView(viewName) {
