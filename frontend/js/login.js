@@ -36,7 +36,19 @@ async function handleForgotPasswordRequest(e) {
         // ✨✨✨ الإصلاح الحقيقي: تعريف العميل هنا باستخدام المتغيرات العامة ✨✨✨
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const { data: user, error } = await supabaseClient.from('users').select('id, password, prenom, nom').eq('email', email).single();
+        const { data: users, error } = await supabaseClient.functions.invoke('api-handler', {
+            body: {
+                table: 'users',
+                method: 'select',
+                payload: 'id, password, prenom, nom', // ما هي الأعمدة التي نريدها
+                match: { email: email } // شرط الـ where
+            },
+        });
+
+        if (error) throw new Error("فشل الاتصال بالخادم.");
+
+        // بما أن `data` الآن هي مصفوفة، نأخذ العنصر الأول
+        const user = users && users.length > 0 ? users[0] : null;
         if (error || !user) throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
         if (user.password !== null) throw new Error("هذا الحساب لديه كلمة مرور بالفعل.");
         
