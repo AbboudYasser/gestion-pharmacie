@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين - نظام إدارة الصيدلية</title>
+    
+    <link rel="icon" type="image/png" href="images/icon/phar_cfpa_gray.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/users.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-pills"></i>
+                <h1>نظام إدارة الصيدلية</h1>
+            </div>
+            <div class="header-actions">
+                <!-- يمكنك إضافة أزرار الإشعارات والمستخدم هنا لاحقًا -->
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>لوحة التحكم</span></a></li>
+                    <li class="nav-item"><a href="patients.html" class="nav-link"><i class="fas fa-user-injured"></i><span>إدارة المرضى</span></a></li>
+                    <li class="nav-item"><a href="stock.html" class="nav-link"><i class="fas fa-boxes"></i><span>إدارة المخزون</span></a></li>
+                    <li class="nav-item"><a href="fournisseurs.html" class="nav-link"><i class="fas fa-truck"></i><span>الموردين</span></a></li>
+                    <li class="nav-item active"><a href="users.html" class="nav-link"><i class="fas fa-users"></i><span>إدارة المستخدمين</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title"><h1><i class="fas fa-users-cog"></i> إدارة المستخدمين</h1></div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="addUserBtn"><i class="fas fa-plus"></i> إضافة مستخدم جديد</button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- بطاقة قائمة المستخدمين -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>قائمة المستخدمين</h3>
+                        <div class="search-bar">
+                            <input type="text" id="searchInput" placeholder="ابحث بالاسم, الدور, أو البريد الإلكتروني...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم الكامل</th><th>الدور</th><th>البريد الإلكتروني</th><th>الحالة</th><th style="text-align: left;">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ** قسم إضافة المستخدم الجديد (بطاقة منفصلة ) ** -->
+                <div id="addUserContainer" class="add-user-container" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 id="formTitle">إضافة مستخدم جديد</h3>
+                            <button id="closeFormBtn" class="close-form-btn">&times;</button>
+                        </div>
+                        <div class="card-body">
+                            <form id="userForm">
+                                <input type="hidden" id="userId">
+                                <div class="form-row">
+		          <div class="form-group"><label for="lastName">اللقب</label><input type="text" id="lastName" required></div>
+                                    <div class="form-group"><label for="firstName">الاسم</label><input type="text" id="firstName" required></div>                                    
+                                </div>
+                                <div class="form-group"><label for="email">البريد الإلكتروني</label><input type="email" id="email" required></div>
+                                <div class="form-group"><label for="phone">رقم الهاتف</label><input type="tel" id="phone"></div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="idType">نوع بطاقة الهوية</label>
+                                        <select id="idType" required>
+                                            <option value="carte_nationale">بطاقة وطنية</option>
+                                            <option value="passeport">جواز سفر</option>
+                                            <option value="permis_conduire">رخصة سياقة</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label for="idNumber">رقم بطاقة الهوية</label><input type="text" id="idNumber" required></div>
+                                </div>
+                                <div class="form-group"><label for="roleSelect">الدور</label><select id="roleSelect" required></select></div>
+                                <div class="form-group" id="service-group" style="display: none;"><label for="serviceSelect">القسم</label><select id="serviceSelect"></select></div>
+                                <div class="form-group" id="fournisseur-group" style="display: none;"><label for="fournisseurSelect">المورد</label><select id="fournisseurSelect"></select></div>
+                                <div class="form-group"><label class="checkbox-container"><input type="checkbox" id="isActive" checked><span class="checkmark"></span>مستخدم نشط</label></div>
+                                <div class="form-footer">
+                                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> حفظ</button>
+                                    <button type="button" class="btn btn-secondary" id="cancelFormBtn">إلغاء</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/users.js"></script>
+</body>
+</html>

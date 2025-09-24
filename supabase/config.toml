@@ -1,0 +1,10 @@
+# config.toml
+
+# تعريف وظيفة "login-user".
+# بما أن الملف الرئيسي هو "index.ts"، لا نحتاج إلى تحديد إعدادات إضافية.
+[functions.login-user]
+
+# تعريف وظيفة "set-password".
+# بما أن الملف الرئيسي هو "index.ts"، لا نحتاج إلى تحديد إعدادات إضافية.
+[functions.set-password]
+

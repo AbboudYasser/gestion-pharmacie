@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المرضى - نظام إدارة الصيدلية</title>
+    <link rel="icon" type="image/png" href="images/icon/phar_cfpa_gray.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/patients.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- الشريط العلوي -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-pills"></i>
+                <h1>نظام إدارة الصيدلية</h1>
+            </div>
+            
+            <div class="header-actions">
+                <div class="notifications">
+                    <button class="notification-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">3</span>
+                    </button>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userName">أحمد محمد</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            الملف الشخصي
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            الإعدادات
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            تسجيل الخروج
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- الشريط الجانبي -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>لوحة التحكم</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-file-prescription"></i>
+                            <span>الوصفات الطبية</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="patients.html" class="nav-link">
+                            <i class="fas fa-user-injured"></i>
+                            <span>إدارة المرضى</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stock.html" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>إدارة المخزون</span>
+                        </a>
+                    </li>                   
+                    <li class="nav-item">
+                        <a href="fournisseurs.html" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            <span>الموردين</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase-orders.html" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>طلبات الشراء</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>التقارير</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>إدارة المستخدمين</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1><i class="fas fa-user-injured"></i> إدارة المرضى</h1>
+                    <p>إدارة بيانات المرضى والتاريخ المرضي</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" onclick="showAddPatientModal()">
+                        <i class="fas fa-plus"></i>
+                        إضافة مريض جديد
+                    </button>
+                </div>
+            </div>
+
+            <!-- شريط البحث والتصفية -->
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="البحث بالاسم أو رقم الهوية أو رقم الهاتف..." onkeyup="searchPatients()">
+                </div>
+                <div class="filter-options">
+                    <select id="genderFilter" onchange="filterPatients()">
+                        <option value="">جميع الأجناس</option>
+                        <option value="ذكر">ذكر</option>
+                        <option value="أنثى">أنثى</option>
+                    </select>
+                    <select id="ageFilter" onchange="filterPatients()">
+                        <option value="">جميع الأعمار</option>
+                        <option value="0-18">أطفال (0-18)</option>
+                        <option value="19-60">بالغين (19-60)</option>
+                        <option value="60+">كبار السن (60+)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- إحصائيات سريعة -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalPatients">0</h3>
+                        <p>إجمالي المرضى</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="newPatientsToday">0</h3>
+                        <p>مرضى جدد اليوم</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-prescription"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="activePrescriptions">0</h3>
+                        <p>وصفات نشطة</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="allergiesCount">0</h3>
+                        <p>مرضى لديهم حساسيات</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول المرضى -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>قائمة المرضى</h3>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportPatients()">
+                            <i class="fas fa-download"></i>
+                            تصدير
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshPatients()">
+                            <i class="fas fa-sync-alt"></i>
+                            تحديث
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="data-table" id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>رقم الهوية</th>
+                                <th>الاسم الكامل</th>
+                                <th>الجنس</th>
+                                <th>العمر</th>
+                                <th>رقم الهاتف</th>
+                                <th>تاريخ التسجيل</th>
+                                <th>الحساسيات</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            <!-- سيتم ملء البيانات ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        عرض <span id="showingStart">1</span> إلى <span id="showingEnd">10</span> من <span id="totalRecords">0</span> سجل
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="btn btn-sm" onclick="previousPage()" id="prevBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="page-numbers" id="pageNumbers"></span>
+                        <button class="btn btn-sm" onclick="nextPage()" id="nextBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- نافذة إضافة/تعديل مريض -->
+    <div class="modal" id="patientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">إضافة مريض جديد</h3>
+                <button class="modal-close" onclick="closePatientModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="patientForm" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nationalId">رقم الهوية الوطنية *</label>
+                        <input type="text" id="nationalId" name="nationalId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullName">الاسم الكامل *</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateOfBirth">تاريخ الميلاد *</label>
+                        <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">الجنس *</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">اختر الجنس</option>
+                            <option value="ذكر">ذكر</option>
+                            <option value="أنثى">أنثى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">رقم الهاتف *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emergencyContact">جهة الاتصال في الطوارئ</label>
+                        <input type="tel" id="emergencyContact" name="emergencyContact">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">العنوان</label>
+                    <textarea id="address" name="address" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="allergies">الحساسيات المعروفة</label>
+                    <input type="text" id="allergies" name="allergies" placeholder="مثال: البنسلين، الأسبرين (افصل بفاصلة)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="medicalHistory">التاريخ المرضي</label>
+                    <textarea id="medicalHistory" name="medicalHistory" rows="4" placeholder="الأمراض المزمنة، العمليات السابقة، الأدوية المستمرة..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="insuranceNumber">رقم التأمين الصحي</label>
+                    <input type="text" id="insuranceNumber" name="insuranceNumber">
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closePatientModal()">إلغاء</button>
+                <button type="submit" class="btn btn-primary" onclick="savePatient()">
+                    <i class="fas fa-save"></i>
+                    حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة عرض تفاصيل المريض -->
+    <div class="modal" id="patientDetailsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>تفاصيل المريض</h3>
+                <button class="modal-close" onclick="closePatientDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="patient-details-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="showTab('info')">المعلومات الأساسية</button>
+                        <button class="tab-btn" onclick="showTab('prescriptions')">الوصفات الطبية</button>
+                        <button class="tab-btn" onclick="showTab('history')">التاريخ المرضي</button>
+                    </div>
+                    
+                    <div class="tab-content">
+                        <div id="info-tab" class="tab-pane active">
+                            <div class="patient-info-grid">
+                                <div class="info-item">
+                                    <label>رقم الهوية:</label>
+                                    <span id="detailNationalId">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>الاسم الكامل:</label>
+                                    <span id="detailFullName">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>الجنس:</label>
+                                    <span id="detailGender">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>تاريخ الميلاد:</label>
+                                    <span id="detailDateOfBirth">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>العمر:</label>
+                                    <span id="detailAge">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>رقم الهاتف:</label>
+                                    <span id="detailPhone">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>جهة الاتصال في الطوارئ:</label>
+                                    <span id="detailEmergencyContact">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>رقم التأمين:</label>
+                                    <span id="detailInsuranceNumber">-</span>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>العنوان:</label>
+                                    <span id="detailAddress">-</span>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>الحساسيات:</label>
+                                    <span id="detailAllergies">-</span>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>التاريخ المرضي:</label>
+                                    <span id="detailMedicalHistory">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="prescriptions-tab" class="tab-pane">
+                            <div class="prescriptions-list" id="patientPrescriptions">
+                                <!-- سيتم ملء الوصفات ديناميكياً -->
+                            </div>
+                        </div>
+                        
+                        <div id="history-tab" class="tab-pane">
+                            <div class="medical-history" id="patientHistory">
+                                <!-- سيتم ملء التاريخ المرضي ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closePatientDetailsModal()">إغلاق</button>
+                <button type="button" class="btn btn-primary" onclick="editCurrentPatient()">
+                    <i class="fas fa-edit"></i>
+                    تعديل
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحميل الملفات الخارجية -->
+    <script src="js/config.js"></script>
+    <script src="js/mockData.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/patients.js"></script>
+</body>
+</html>
+

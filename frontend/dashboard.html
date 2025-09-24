@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الصيدلية</title>
+    <link rel="icon" type="image/png" href="images/icon/phar_cfpa_gray.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- الشريط العلوي -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-pills"></i>
+                <h1>نظام إدارة الصيدلية</h1>
+            </div>
+            
+            <div class="header-actions">
+                <div class="notifications">
+                    <button class="notification-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">3</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3>الإشعارات</h3>
+                            <span class="mark-all-read">تحديد الكل كمقروء</span>
+                        </div>
+                        <div class="notification-list">
+                            <div class="notification-item unread">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                <div class="notification-content">
+                                    <p>نقص في مخزون دواء الباراسيتامول</p>
+                                    <span class="notification-time">منذ 5 دقائق</span>
+                                </div>
+                            </div>
+                            <div class="notification-item unread">
+                                <i class="fas fa-file-prescription text-info"></i>
+                                <div class="notification-content">
+                                    <p>وصفة طبية جديدة من د. أحمد محمد</p>
+                                    <span class="notification-time">منذ 15 دقيقة</span>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <i class="fas fa-truck text-success"></i>
+                                <div class="notification-content">
+                                    <p>تم استلام شحنة جديدة من المورد</p>
+                                    <span class="notification-time">منذ ساعة</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userName">أحمد محمد</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            الملف الشخصي
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            الإعدادات
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            تسجيل الخروج
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- الشريط الجانبي -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="dashboard.html" class="nav-link" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>لوحة التحكم</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="prescriptions">
+                            <i class="fas fa-file-prescription"></i>
+                            <span>الوصفات الطبية</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="patients.html" class="nav-link">
+                        <i class="fas fa-user-injured"></i>
+                        <span>إدارة المرضى</span>
+                      </a>
+                    </li>                    
+                    <li class="nav-item">
+                        <a href="stock.html" class="nav-link" data-section="inventory">
+                            <i class="fas fa-boxes"></i>
+                            <span>إدارة المخزون</span>
+                        </a>
+                    </li>                  
+                    <li class="nav-item">
+                        <a href="fournisseurs.html" class="nav-link" data-section="suppliers">
+                            <i class="fas fa-truck"></i>
+                            <span>الموردين</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="reports">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>التقارير</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="users">
+                            <i class="fas fa-users"></i>
+                            <span>إدارة المستخدمين</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="messages">
+                            <i class="fas fa-comments"></i>
+                            <span>الرسائل</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="main-content">
+            <!-- قسم لوحة التحكم -->
+            <section id="dashboard-section" class="content-section active">
+                <div class="section-header">
+                    <h2>لوحة التحكم</h2>
+                    <p>نظرة عامة على نشاط الصيدلية</p>
+                </div>
+
+                <!-- البطاقات الإحصائية -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-prescription"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>الوصفات اليوم</h3>
+                            <div class="stat-number">24</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                +12% من الأمس
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>الأدوية المتوفرة</h3>
+                            <div class="stat-number">1,247</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                -3% من الأسبوع الماضي
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>أدوية منتهية الصلاحية</h3>
+                            <div class="stat-number">8</div>
+                            <div class="stat-change warning">
+                                <i class="fas fa-clock"></i>
+                                يتطلب انتباه
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>طلبات الشراء المعلقة</h3>
+                            <div class="stat-number">5</div>
+                            <div class="stat-change neutral">
+                                <i class="fas fa-minus"></i>
+                                لا تغيير
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الرسوم البيانية والجداول -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>الوصفات الأخيرة</h3>
+                            <a href="#" class="view-all">عرض الكل</a>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم الوصفة</th>
+                                        <th>اسم المريض</th>
+                                        <th>الطبيب</th>
+                                        <th>الحالة</th>
+                                        <th>التاريخ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#P001</td>
+                                        <td>محمد أحمد</td>
+                                        <td>د. سارة علي</td>
+                                        <td><span class="badge badge-warning">معلقة</span></td>
+                                        <td>2025-06-13</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#P002</td>
+                                        <td>فاطمة محمد</td>
+                                        <td>د. أحمد حسن</td>
+                                        <td><span class="badge badge-success">مصروفة</span></td>
+                                        <td>2025-06-13</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#P003</td>
+                                        <td>علي محمود</td>
+                                        <td>د. نور الدين</td>
+                                        <td><span class="badge badge-success">مصروفة</span></td>
+                                        <td>2025-06-12</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>الأدوية الأكثر طلباً</h3>
+                        </div>
+                        <div class="popular-medications">
+                            <div class="medication-item">
+                                <div class="medication-info">
+                                    <h4>باراسيتامول 500mg</h4>
+                                    <p>مسكن للألم وخافض للحرارة</p>
+                                </div>
+                                <div class="medication-count">
+                                    <span class="count">45</span>
+                                    <span class="label">طلب</span>
+                                </div>
+                            </div>
+                            <div class="medication-item">
+                                <div class="medication-info">
+                                    <h4>أموكسيسيلين 250mg</h4>
+                                    <p>مضاد حيوي</p>
+                                </div>
+                                <div class="medication-count">
+                                    <span class="count">32</span>
+                                    <span class="label">طلب</span>
+                                </div>
+                            </div>
+                            <div class="medication-item">
+                                <div class="medication-info">
+                                    <h4>أوميبرازول 20mg</h4>
+                                    <p>مثبط مضخة البروتون</p>
+                                </div>
+                                <div class="medication-count">
+                                    <span class="count">28</span>
+                                    <span class="label">طلب</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- أقسام أخرى ستضاف لاحقاً -->
+            <section id="prescriptions-section" class="content-section">
+                <div class="section-header">
+                    <h2>الوصفات الطبية</h2>
+                    <p>إدارة الوصفات الطبية وصرف الأدوية</p>
+                </div>
+                <div class="coming-soon">
+                    <i class="fas fa-tools"></i>
+                    <h3>قيد التطوير</h3>
+                    <p>هذا القسم سيتم إضافته قريباً</p>
+                </div>
+            </section>
+
+            <section id="inventory-section" class="content-section">
+                <div class="section-header">
+                    <h2>إدارة المخزون</h2>
+                    <p>متابعة وإدارة مخزون الأدوية والمستلزمات الطبية</p>
+                </div>
+                <div class="coming-soon">
+                    <i class="fas fa-tools"></i>
+                    <h3>قيد التطوير</h3>
+                    <p>هذا القسم سيتم إضافته قريباً</p>
+                </div>
+            </section>
+
+            <section id="suppliers-section" class="content-section">
+                <div class="section-header">
+                    <h2>الموردون</h2>
+                    <p>إدارة الموردين وطلبات الشراء</p>
+                </div>
+                <div class="coming-soon">
+                    <i class="fas fa-tools"></i>
+                    <h3>قيد التطوير</h3>
+                    <p>هذا القسم سيتم إضافته قريباً</p>
+                </div>
+            </section>
+
+            <section id="reports-section" class="content-section">
+                <div class="section-header">
+                    <h2>التقارير</h2>
+                    <p>تقارير وإحصائيات شاملة عن نشاط الصيدلية</p>
+                </div>
+                <div class="coming-soon">
+                    <i class="fas fa-tools"></i>
+                    <h3>قيد التطوير</h3>
+                    <p>هذا القسم سيتم إضافته قريباً</p>
+                </div>
+            </section>
+
+            <section id="users-section" class="content-section">
+                <div class="section-header">
+                    <h2>إدارة المستخدمين</h2>
+                    <p>إدارة حسابات المستخدمين والصلاحيات</p>
+                </div>
+                <div class="coming-soon">
+                    <i class="fas fa-tools"></i>
+                    <h3>قيد التطوير</h3>
+                    <p>هذا القسم سيتم إضافته قريباً</p>
+                </div>
+            </section>
+
+            <section id="messages-section" class="content-section">
+                <div class="section-header">
+                    <h2>الرسائل</h2>
+                    <p>التواصل مع أعضاء الفريق والمستشفيات الأخرى</p>
+                </div>
+                <div class="coming-soon">
+                    <i class="fas fa-tools"></i>
+                    <h3>قيد التطوير</h3>
+                    <p>هذا القسم سيتم إضافته قريباً</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/mockData.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,95 @@
+
+
+
+
+
+
+
+.status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.status.status-active {
+    background-color: #d4edda; 
+    color: #155724; 
+}
+
+.status.status-inactive {
+    background-color: #f8d7da; 
+    color: #721c24; 
+}
+
+
+.actions {
+    text-align: left;
+    white-space: nowrap;
+}
+
+.btn-action {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.btn-action:hover {
+    transform: scale(1.1) translateY(-1px);
+}
+
+.btn-edit {
+    background-color: #eaf5ff; 
+    color: #3498db; 
+}
+
+.btn-delete {
+    background-color: #ffebee; 
+    color: #e74c3c; 
+}
+
+
+.card-header .search-bar input {
+    border-radius: 20px; 
+}
+
+
+
+
+.add-user-container {
+    margin-top: 2rem; 
+    animation: fadeIn 0.5s ease-out;
+}
+
+.close-form-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-form-btn:hover {
+    color: var(--accent-color);
+}
+
+.form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #e9ecef;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+}
