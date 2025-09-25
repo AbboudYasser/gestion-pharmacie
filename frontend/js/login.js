@@ -1,6 +1,5 @@
 // ==================================================================
-//   ملف login.js الكامل والنهائي - نظام إدارة الصيدلية
-//   يحتوي على كل الدوال الرئيسية والمساعدة
+//   ملف login.js النهائي والمكتفي ذاتيًا - 25 سبتمبر 2025
 // ==================================================================
 
 // --- الخطوة 1: ربط العناصر التفاعلية عند تحميل الصفحة ---
@@ -55,8 +54,10 @@ async function handleSetupPassword(e) {
         const otp = document.getElementById("otp").value;
         const newPassword = document.getElementById("newPassword").value;
         const confirmPassword = document.getElementById("confirmPassword").value;
+        
         if (newPassword !== confirmPassword) throw new Error("كلمتا المرور غير متطابقتين.");
         if (!generatedOTP || otp !== generatedOTP) throw new Error("رمز التحقق (OTP) غير صحيح.");
+
         const data = await apiCall("SETUP_PASSWORD", { email: userEmailForSetup, newPassword: newPassword });
         showAlert(data.message, "success");
         setTimeout(() => {
@@ -108,8 +109,10 @@ function updateView(viewName) {
     const loginForm = document.getElementById('loginForm');
     const setupForm = document.getElementById('setupPasswordForm');
     const alertContainer = document.getElementById('alert-container');
-    alertContainer.innerHTML = '';
-    alertContainer.style.display = 'none';
+    if (alertContainer) {
+        alertContainer.innerHTML = '';
+        alertContainer.style.display = 'none';
+    }
     if (viewName === 'login') {
         loginForm.style.display = 'block';
         setupForm.style.display = 'none';
@@ -121,6 +124,7 @@ function updateView(viewName) {
 
 function showAlert(message, type = "info") {
     const alertContainer = document.getElementById('alert-container');
+    if (!alertContainer) return;
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.textContent = message;
@@ -148,6 +152,7 @@ function showLoading(isLoading, btnId) {
 function togglePassword(inputId, iconId) {
     const passwordInput = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
+    if (!passwordInput || !icon) return;
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
         icon.classList.remove("fa-eye");
