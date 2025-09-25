@@ -1,6 +1,6 @@
-// supabase/functions/api/index.ts
-// النسخة النهائية والمصححة
-
+// ==================================================================
+//   ملف supabase/functions/api/index.ts (النسخة النهائية)
+// ==================================================================
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, handleOptions } from "../_shared/cors.ts";
@@ -18,7 +18,6 @@ serve(async (req ) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // --- الموزع الذكي: switch واحد فقط لجميع الإجراءات ---
     switch (action) {
       case "LOGIN_USER": {
         const { email, password } = payload;

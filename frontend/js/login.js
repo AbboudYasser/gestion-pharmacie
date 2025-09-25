@@ -1,8 +1,6 @@
 // ==================================================================
-//   ملف login.js النهائي والمكتفي ذاتيًا - 25 سبتمبر 2025
+//   ملف frontend/js/login.js (النسخة النهائية)
 // ==================================================================
-
-// --- الخطوة 1: ربط العناصر التفاعلية عند تحميل الصفحة ---
 document.addEventListener("DOMContentLoaded", function() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) loginForm.addEventListener('submit', handleLogin);
@@ -17,11 +15,8 @@ document.addEventListener("DOMContentLoaded", function() {
     if (backToLoginBtn) backToLoginBtn.addEventListener('click', () => updateView('login'));
 });
 
-// --- الخطوة 2: متغيرات لتخزين الحالة ---
 let userEmailForSetup = null;
 let generatedOTP = null;
-
-// --- الخطوة 3: الدوال التي تتعامل مع الأحداث ---
 
 async function handleForgotPasswordRequest(e) {
     e.preventDefault();
@@ -54,10 +49,8 @@ async function handleSetupPassword(e) {
         const otp = document.getElementById("otp").value;
         const newPassword = document.getElementById("newPassword").value;
         const confirmPassword = document.getElementById("confirmPassword").value;
-        
         if (newPassword !== confirmPassword) throw new Error("كلمتا المرور غير متطابقتين.");
         if (!generatedOTP || otp !== generatedOTP) throw new Error("رمز التحقق (OTP) غير صحيح.");
-
         const data = await apiCall("SETUP_PASSWORD", { email: userEmailForSetup, newPassword: newPassword });
         showAlert(data.message, "success");
         setTimeout(() => {
@@ -90,8 +83,6 @@ async function handleLogin(e) {
         showLoading(false, 'loginBtn');
     }
 }
-
-// --- الخطوة 4: الدوال المساعدة (التي كانت مفقودة) ---
 
 async function apiCall(action, payload) {
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -149,7 +140,7 @@ function showLoading(isLoading, btnId) {
     }
 }
 
-function togglePassword(inputId, iconId) {
+window.togglePassword = function(inputId, iconId) {
     const passwordInput = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
     if (!passwordInput || !icon) return;
@@ -165,9 +156,6 @@ function togglePassword(inputId, iconId) {
 }
 
 function redirectUser(role) {
-    if (role === 'admin') {
-        window.location.href = 'dashboard.html';
-    } else {
-        window.location.href = 'index.html';
-    }
+    const destinations = { 'admin': 'dashboard.html', 'pharmacien': 'stock.html', 'directeur': 'dashboard.html', 'chef_service': 'department_requests.html', 'fournisseur': 'supplier_orders.html' };
+    window.location.href = destinations[role] || 'login.html';
 }
