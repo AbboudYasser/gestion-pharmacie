@@ -1,65 +1,52 @@
-// ==================================================================
-//   ملف supabase/functions/api/index.ts (النسخة النهائية)
-// ==================================================================
+// supabase/functions/api/index.ts (نسخة التشخيص)
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, handleOptions } from "../_shared/cors.ts";
 import * as bcrypt from "https://esm.sh/bcryptjs@2.4.3";
 
 serve(async (req ) => {
+  // التعامل مع OPTIONS أولاً
   const optionsResponse = handleOptions(req);
   if (optionsResponse) return optionsResponse;
 
   try {
+    // التحقق من أن الطلب هو POST
+    if (req.method !== 'POST') {
+      throw new Error('Method Not Allowed: Only POST requests are accepted.');
+    }
+
     const { action, payload } = await req.json();
+    if (!action) throw new Error("Action is missing from the request body.");
 
     const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // --- المنطق الرئيسي ---
     switch (action) {
-      case "LOGIN_USER": {
-        const { email, password } = payload;
-        if (!email || !password) throw new Error("البريد الإلكتروني وكلمة المرور مطلوبان.");
-
-        const { data: user, error } = await supabaseAdmin.from("users").select("id, password, role").eq("email", email).single();
-        if (error || !user) throw new Error("بيانات الاعتماد غير صحيحة.");
-        if (user.password === null) throw new Error("هذا الحساب لم يقم بتعيين كلمة مرور بعد. استخدم 'كلمة مرور جديدة؟'.");
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) throw new Error("بيانات الاعتماد غير صحيحة.");
-
-        return new Response(JSON.stringify({ message: "تم تسجيل الدخول بنجاح!", userId: user.id, userRole: user.role }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-
-      case "SETUP_PASSWORD": {
-        const { email, newPassword } = payload;
-        if (!email || !newPassword) throw new Error("البريد الإلكتروني وكلمة المرور الجديدة مطلوبان.");
-        if (newPassword.length < 8) throw new Error("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const { error } = await supabaseAdmin.from("users").update({ password: hashedPassword }).eq("email", email);
-        if (error) throw new Error("فشل تحديث كلمة المرور: " + error.message);
-
-        return new Response(JSON.stringify({ message: "تم تعيين كلمة المرور بنجاح!" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-
       case "CHECK_USER_EXISTS": {
         const { email } = payload;
-        if (!email) throw new Error("البريد الإلكتروني مطلوب.");
-
+        if (!email) throw new Error("Email is required for CHECK_USER_EXISTS.");
         const { data: user, error } = await supabaseAdmin.from("users").select("prenom, nom, password").eq("email", email).single();
-        if (error || !user) throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
-        if (user.password !== null) throw new Error("هذا الحساب لديه كلمة مرور بالفعل. يمكنك تسجيل الدخول مباشرة.");
-
-        return new Response(JSON.stringify({ prenom: user.prenom, nom: user.nom }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (error || !user) throw new Error("No account found with this email.");
+        if (user.password !== null) throw new Error("This account already has a password.");
+        return new Response(JSON.stringify({ prenom: user.prenom, nom: user.nom }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
       }
-
+      // ... أضف الحالات الأخرى هنا إذا لزم الأمر
       default:
-        throw new Error(`الإجراء '${action}' غير معروف أو غير صالح.`);
+        throw new Error(`Invalid action: '${action}'.`);
     }
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (e) {
+    // --- معالج الأخطاء الشامل والجديد ---
+    // هذا سيضمن دائمًا إرجاع رسالة خطأ واضحة
+    const errorResponse = {
+      error: e.message,
+      stack: e.stack, // لإظهار تفاصيل الخطأ الكاملة في الـ Console
+    };
+    return new Response(JSON.stringify(errorResponse), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400, // استخدام 400 للأخطاء المتوقعة
+    });
   }
 });

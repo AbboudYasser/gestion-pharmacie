@@ -1,18 +1,14 @@
-// ==================================================================
-//   ملف frontend/js/login.js (النسخة النهائية)
-// ==================================================================
 document.addEventListener("DOMContentLoaded", function() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init("nR-eq2QOrW8I_ZUmu");
+    } else {
+        console.error("EmailJS SDK not loaded!");
+    }
 
-    const setupPasswordForm = document.getElementById('setupPasswordForm');
-    if (setupPasswordForm) setupPasswordForm.addEventListener('submit', handleSetupPassword);
-
-    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-    if (forgotPasswordLink) forgotPasswordLink.addEventListener('click', handleForgotPasswordRequest);
-
-    const backToLoginBtn = document.getElementById('backToLoginBtn');
-    if (backToLoginBtn) backToLoginBtn.addEventListener('click', () => updateView('login'));
+    document.getElementById("loginForm").addEventListener("submit", handleLogin);
+    document.getElementById("setupPasswordForm").addEventListener("submit", handleSetupPassword);
+    document.getElementById("forgotPasswordLink").addEventListener("click", handleForgotPasswordRequest);
+    document.getElementById("backToLoginBtn").addEventListener("click", () => updateView('login'));
 });
 
 let userEmailForSetup = null;
@@ -27,12 +23,14 @@ async function handleForgotPasswordRequest(e) {
     }
     showLoading(true, 'loginBtn');
     try {
-        const userData = await apiCall("CHECK_USER_EXISTS", { email: email });
+        const { data: user, error } = await supabaseClient.from('users').select('id, password, prenom, nom').eq('email', email).single();
+        if (error || !user) throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
+        if (user.password !== null) {
+            throw new Error("هذا الحساب لديه كلمة مرور بالفعل.");
+        }
         userEmailForSetup = email;
-        const fullName = `${userData.prenom} ${userData.nom}`;
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-        const templateParams = { to_email: email, to_name: fullName, otp_code: generatedOTP };
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        const fullName = `${user.prenom} ${user.nom}`;
+        await sendOTP(email, fullName);
         showAlert(`تم إرسال رمز التحقق إلى ${email}.`, "success");
         updateView('setupPassword');
     } catch (error) {
@@ -42,21 +40,40 @@ async function handleForgotPasswordRequest(e) {
     }
 }
 
+async function sendOTP(email, name) {
+    generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const templateParams = { to_email: email, to_name: name, otp_code: generatedOTP };
+    try {
+        await emailjs.send('service_q792eyc', 'template_g3osree', templateParams);
+    } catch (error) {
+        console.error('EmailJS send failed:', error);
+        generatedOTP = null;
+        throw new Error("فشل إرسال رمز التحقق. تحقق من اتصالك بالإنترنت أو إعدادات EmailJS.");
+    }
+}
+
 async function handleSetupPassword(e) {
     e.preventDefault();
     showLoading(true, 'setupBtn');
+    const otp = document.getElementById("otp").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
     try {
-        const otp = document.getElementById("otp").value;
-        const newPassword = document.getElementById("newPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        if (newPassword !== confirmPassword) throw new Error("كلمتا المرور غير متطابقتين.");
         if (!generatedOTP || otp !== generatedOTP) throw new Error("رمز التحقق (OTP) غير صحيح.");
-        const data = await apiCall("SETUP_PASSWORD", { email: userEmailForSetup, newPassword: newPassword });
-        showAlert(data.message, "success");
+        if (newPassword.length < 8) throw new Error("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
+        if (newPassword !== confirmPassword) throw new Error("كلمتا المرور غير متطابقتين.");
+        
+        // الآن bcrypt سيكون متاحًا بالتأكيد بفضل 'defer'
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        const { error } = await supabaseClient.from('users').update({ password: hashedPassword }).eq('email', userEmailForSetup);
+        if (error) throw error;
+        
+        showAlert("تم تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول.", "success");
+        generatedOTP = null;
+        userEmailForSetup = null;
         setTimeout(() => {
-            document.getElementById('otp').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
+            document.getElementById("setupPasswordForm").reset();
             updateView('login');
         }, 2000);
     } catch (error) {
@@ -69,14 +86,21 @@ async function handleSetupPassword(e) {
 async function handleLogin(e) {
     e.preventDefault();
     showLoading(true, 'loginBtn');
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
     try {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const data = await apiCall("LOGIN_USER", { email, password });
-        localStorage.setItem('userRole', data.userRole);
-        localStorage.setItem('userId', data.userId);
-        showAlert("تم تسجيل الدخول بنجاح!", "success");
-        setTimeout(() => redirectUser(data.userRole), 1500);
+        const { data: user, error } = await supabaseClient.from('users').select('id, password, role').eq('email', email).single();
+        if (error || !user) throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+        if (user.password === null) throw new Error("ليس لديك كلمة مرور. استخدم 'كلمة مرور جديدة؟'.");
+        
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+        
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('userId', user.id);
+        
+        showAlert("تم تسجيل الدخول بنجاح. جاري توجيهك...", "success");
+        setTimeout(() => redirectUser(user.role), 1500);
     } catch (error) {
         showAlert(error.message, "danger");
     } finally {
@@ -84,78 +108,35 @@ async function handleLogin(e) {
     }
 }
 
-async function apiCall(action, payload) {
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data, error } = await supabaseClient.functions.invoke('api', {
-        body: { action, payload },
-    });
-    if (error) {
-        const errorMessage = (data && data.error) ? data.error : (error.context && error.context.msg) || error.message;
-        throw new Error(errorMessage || "فشل الاتصال بالخادم.");
-    }
-    return data;
+function redirectUser(role) {
+    const destinations = { 'pharmacien': 'stock.html', 'directeur': 'dashboard.html', 'chef_service': 'department_requests.html', 'fournisseur': 'supplier_orders.html' };
+    window.location.href = destinations[role] || 'login.html';
 }
 
 function updateView(viewName) {
-    const loginForm = document.getElementById('loginForm');
-    const setupForm = document.getElementById('setupPasswordForm');
-    const alertContainer = document.getElementById('alert-container');
-    if (alertContainer) {
-        alertContainer.innerHTML = '';
-        alertContainer.style.display = 'none';
-    }
-    if (viewName === 'login') {
-        loginForm.style.display = 'block';
-        setupForm.style.display = 'none';
-    } else if (viewName === 'setupPassword') {
-        loginForm.style.display = 'none';
-        setupForm.style.display = 'block';
-    }
+    document.getElementById('loginForm').style.display = (viewName === 'login') ? 'block' : 'none';
+    document.getElementById('setupPasswordForm').style.display = (viewName === 'setupPassword') ? 'block' : 'none';
+    document.getElementById("alert-container").innerHTML = '';
 }
 
-function showAlert(message, type = "info") {
-    const alertContainer = document.getElementById('alert-container');
-    if (!alertContainer) return;
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-    alertContainer.innerHTML = '';
-    alertContainer.appendChild(alertDiv);
-    alertContainer.style.display = 'block';
+function showAlert(message, type) {
+    const alertContainer = document.getElementById("alert-container");
+    alertContainer.innerHTML = `<div class="alert alert-${type}"><i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-triangle"}"></i> ${message}</div>`;
+    if (type !== 'success') {
+        setTimeout(() => alertContainer.innerHTML = '', 6000);
+    }
 }
 
 function showLoading(isLoading, btnId) {
     const button = document.getElementById(btnId);
-    if (!button) return;
-    if (isLoading) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
-    } else {
-        button.disabled = false;
-        if (btnId === 'loginBtn') {
-            button.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
-        } else if (btnId === 'setupBtn') {
-            button.innerHTML = '<i class="fas fa-check"></i> تعيين كلمة المرور';
-        }
-    }
+    const defaultTexts = { 'loginBtn': '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول', 'setupBtn': '<i class="fas fa-check"></i> تعيين كلمة المرور' };
+    button.disabled = isLoading;
+    button.innerHTML = isLoading ? `<i class="fas fa-spinner fa-spin"></i> جاري التحميل...` : defaultTexts[btnId];
 }
 
-window.togglePassword = function(inputId, iconId) {
+function togglePassword(inputId, iconId) {
     const passwordInput = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    if (!passwordInput || !icon) return;
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
-    } else {
-        passwordInput.type = "password";
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
-    }
-}
-
-function redirectUser(role) {
-    const destinations = { 'admin': 'dashboard.html', 'pharmacien': 'stock.html', 'directeur': 'dashboard.html', 'chef_service': 'department_requests.html', 'fournisseur': 'supplier_orders.html' };
-    window.location.href = destinations[role] || 'login.html';
+    const toggleIcon = document.getElementById(iconId);
+    passwordInput.type = (passwordInput.type === "password") ? "text" : "password";
+    toggleIcon.className = `fas ${passwordInput.type === "password" ? "fa-eye" : "fa-eye-slash"}`;
 }
