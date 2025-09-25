@@ -32,8 +32,7 @@
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="password" name="password" required dir="ltr" placeholder="* * * * * * * * * * * *">
-                        <!-- ✨ الإصلاح هنا: إضافة aria-label ✨ -->
-                        <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon' )" aria-label="إظهار أو إخفاء كلمة المرور">
+                        <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon'  )" aria-label="إظهار أو إخفاء كلمة المرور">
                             <i class="fas fa-eye" id="toggleIcon" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -52,7 +51,6 @@
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="newPassword" name="newPassword" required dir="ltr" placeholder="* * * * * * * * * * * *">
-                        <!-- ✨ الإصلاح هنا: إضافة aria-label ✨ -->
                         <button type="button" class="toggle-password" onclick="togglePassword('newPassword', 'toggleNewPassIcon')" aria-label="إظهار أو إخفاء كلمة المرور الجديدة">
                             <i class="fas fa-eye" id="toggleNewPassIcon" aria-hidden="true"></i>
                         </button>
@@ -63,7 +61,6 @@
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="confirmPassword" name="confirmPassword" required dir="ltr" placeholder="* * * * * * * * * * * *">
-                        <!-- ✨ الإصلاح هنا: إضافة aria-label ✨ -->
                         <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', 'toggleConfirmPassIcon')" aria-label="إظهار أو إخفاء تأكيد كلمة المرور">
                             <i class="fas fa-eye" id="toggleConfirmPassIcon" aria-hidden="true"></i>
                         </button>
@@ -77,12 +74,15 @@
         <div class="background-animation"><div class="floating-pill pill-1"></div><div class="floating-pill pill-2"></div><div class="floating-pill pill-3"></div><div class="floating-pill pill-4"></div></div>
     </div>
     
-    <!-- استدعاء المكتبات الخارجية - لا يوجد bcrypt.js -->
+    <!-- استدعاء المكتبات الخارجية -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-    <!-- استدعاء ملفات الشيفرة الخاصة بنا -->
+    <!-- ================== الإصلاح النهائي هنا ================== -->
+    <!-- 1. استدعاء config.js أولاً لتعريف المتغيرات -->
     <script src="js/config.js" defer></script>
-    <script src="js/login.js" defer></script> <!-- استخدم نفس ملف login.js من الرد السابق -->
+    <!-- 2. استدعاء login.js ثانيًا مع إصدار جديد لكسر الذاكرة المؤقتة -->
+    <script src="js/login.js?v=2.0" defer></script>
+    <!-- ======================================================== -->
 </body>
 </html>
