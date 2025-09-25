@@ -1,7 +1,30 @@
-// frontend/js/login.js (النسخة النهائية الصحيحة والبسيطة)
-
+// انتظر حتى يتم تحميل جميع عناصر الصفحة
 document.addEventListener("DOMContentLoaded", function() {
-    // ... (كود التهيئة يبقى كما هو)
+    // --- ربط النماذج والأزرار بالدوال الخاصة بها ---
+
+    // 1. ربط نموذج تسجيل الدخول بدالة handleLogin
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+
+    // 2. ربط نموذج إعداد كلمة المرور بدالة handleSetupPassword
+    const setupPasswordForm = document.getElementById('setupPasswordForm');
+    if (setupPasswordForm) {
+        setupPasswordForm.addEventListener('submit', handleSetupPassword);
+    }
+
+    // 3. ✨✨✨ هذا هو الإصلاح الرئيسي: ربط رابط "كلمة مرور جديدة؟" بدالة handleForgotPasswordRequest ✨✨✨
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', handleForgotPasswordRequest);
+    }
+
+    // 4. ربط زر "الرجوع لتسجيل الدخول" بوظيفة تحديث الواجهة
+    const backToLoginBtn = document.getElementById('backToLoginBtn');
+    if (backToLoginBtn) {
+        backToLoginBtn.addEventListener('click', () => updateView('login'));
+    }
 });
 
 let userEmailForSetup = null;
@@ -13,17 +36,22 @@ async function apiCall(action, payload) {
     const { data, error } = await supabaseClient.functions.invoke('api', {
         body: { action, payload },
     });
-    if (error) throw new Error((data && data.error) || error.message || "فشل الاتصال بالخادم.");
+    // تحسين رسالة الخطأ
+    if (error) {
+        const errorMessage = (data && data.error) ? data.error : (error.context && error.context.msg) || error.message;
+        throw new Error(errorMessage || "فشل الاتصال بالخادم.");
+    }
     return data;
 }
 
 async function handleForgotPasswordRequest(e) {
-    e.preventDefault();
+    e.preventDefault(); // منع الرابط من تحديث الصفحة
     const email = document.getElementById("email").value;
     if (!email) { showAlert("الرجاء إدخال البريد الإلكتروني أولاً.", "danger"); return; }
-    showLoading(true, 'loginBtn');
+    
+    // استخدم زر تسجيل الدخول لإظهار التحميل لأنه مرئي في هذه الواجهة
+    showLoading(true, 'loginBtn'); 
     try {
-        // ✨✨✨ الإصلاح الحقيقي: استدعاء البوابة الوحيدة للتحقق ✨✨✨
         const userData = await apiCall("CHECK_USER_EXISTS", { email: email });
 
         userEmailForSetup = email;
@@ -84,3 +112,9 @@ async function handleLogin(e) {
 
 // --- الدوال المساعدة (لا تغيير هنا) ---
 // ... (redirectUser, updateView, showAlert, showLoading, togglePassword)
+// تأكد من وجود هذه الدوال في ملفك
+function updateView(viewName) {
+    document.getElementById('loginForm').style.display = (viewName === 'login') ? 'block' : 'none';
+    document.getElementById('setupPasswordForm').style.display = (viewName === 'setupPassword') ? 'block' : 'none';
+}
+// ... وباقي الدوال
