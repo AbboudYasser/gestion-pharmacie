@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار النظام - نظام إدارة الصيدلية</title>
+    <link rel="stylesheet" href="frontend/css/style.css">
+    <link rel="stylesheet" href="frontend/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .test-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-vial"></i> اختبار نظام إدارة الصيدلية</h1>
+        <p>هذه الصفحة تختبر المكونات الأساسية للنظام للتأكد من عملها بشكل صحيح.</p>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-file-code"></i> اختبار تحميل الملفات</h3>
+            <div id="files-test"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-database"></i> اختبار الاتصال بـ Supabase</h3>
+            <div id="supabase-test"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-code"></i> اختبار API</h3>
+            <div id="api-test"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-tools"></i> اختبار الوظائف المساعدة</h3>
+            <div id="utils-test"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-link"></i> روابط الصفحات</h3>
+            <div class="test-result test-info">
+                <ul style="margin: 0; padding-right: 20px;">
+                    <li><a href="frontend/login.html" target="_blank">صفحة تسجيل الدخول</a></li>
+                    <li><a href="frontend/dashboard.html" target="_blank">لوحة التحكم</a></li>
+                    <li><a href="frontend/stock.html" target="_blank">إدارة المخزون</a></li>
+                    <li><a href="frontend/patients.html" target="_blank">إدارة المرضى</a></li>
+                    <li><a href="frontend/fournisseurs.html" target="_blank">إدارة الموردين</a></li>
+                    <li><a href="frontend/users.html" target="_blank">إدارة المستخدمين</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحميل المكتبات -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    
+    <!-- تحميل ملفات النظام -->
+    <script src="frontend/js/config.js"></script>
+    <script src="frontend/js/utils.js"></script>
+    <script src="frontend/js/api.js"></script>
+    
+    <script>
+        // اختبار تحميل الملفات
+        function testFiles() {
+            const filesTest = document.getElementById('files-test');
+            let results = [];
+            
+            // اختبار وجود المتغيرات العامة
+            if (typeof SUPABASE_URL !== 'undefined') {
+                results.push('<div class="test-result test-success"><i class="fas fa-check"></i> تم تحميل config.js بنجاح</div>');
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> فشل في تحميل config.js</div>');
+            }
+            
+            if (typeof PharmacyUtils !== 'undefined') {
+                results.push('<div class="test-result test-success"><i class="fas fa-check"></i> تم تحميل utils.js بنجاح</div>');
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> فشل في تحميل utils.js</div>');
+            }
+            
+            if (typeof PharmacyAPI !== 'undefined') {
+                results.push('<div class="test-result test-success"><i class="fas fa-check"></i> تم تحميل api.js بنجاح</div>');
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> فشل في تحميل api.js</div>');
+            }
+            
+            if (typeof supabase !== 'undefined') {
+                results.push('<div class="test-result test-success"><i class="fas fa-check"></i> تم تحميل Supabase بنجاح</div>');
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> فشل في تحميل Supabase</div>');
+            }
+            
+            if (typeof bcrypt !== 'undefined') {
+                results.push('<div class="test-result test-success"><i class="fas fa-check"></i> تم تحميل bcrypt بنجاح</div>');
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> فشل في تحميل bcrypt</div>');
+            }
+            
+            filesTest.innerHTML = results.join('');
+        }
+        
+        // اختبار الاتصال بـ Supabase
+        function testSupabase() {
+            const supabaseTest = document.getElementById('supabase-test');
+            
+            if (typeof supabaseClient !== 'undefined') {
+                supabaseTest.innerHTML = '<div class="test-result test-success"><i class="fas fa-check"></i> تم إنشاء عميل Supabase بنجاح</div>';
+                
+                // اختبار الاتصال
+                supabaseClient.from('users').select('count').limit(1)
+                    .then(({ data, error }) => {
+                        if (error) {
+                            supabaseTest.innerHTML += '<div class="test-result test-error"><i class="fas fa-times"></i> خطأ في الاتصال: ' + error.message + '</div>';
+                        } else {
+                            supabaseTest.innerHTML += '<div class="test-result test-success"><i class="fas fa-check"></i> تم الاتصال بقاعدة البيانات بنجاح</div>';
+                        }
+                    })
+                    .catch(err => {
+                        supabaseTest.innerHTML += '<div class="test-result test-error"><i class="fas fa-times"></i> خطأ في الاتصال: ' + err.message + '</div>';
+                    });
+            } else {
+                supabaseTest.innerHTML = '<div class="test-result test-error"><i class="fas fa-times"></i> لم يتم إنشاء عميل Supabase</div>';
+            }
+        }
+        
+        // اختبار API
+        function testAPI() {
+            const apiTest = document.getElementById('api-test');
+            let results = [];
+            
+            if (typeof PharmacyAPI !== 'undefined') {
+                // اختبار الوظائف الأساسية
+                const methods = ['login', 'logout', 'getCurrentUser', 'showMessage'];
+                methods.forEach(method => {
+                    if (typeof PharmacyAPI[method] === 'function') {
+                        results.push(`<div class="test-result test-success"><i class="fas fa-check"></i> وظيفة ${method} متوفرة</div>`);
+                    } else {
+                        results.push(`<div class="test-result test-error"><i class="fas fa-times"></i> وظيفة ${method} غير متوفرة</div>`);
+                    }
+                });
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> PharmacyAPI غير متوفر</div>');
+            }
+            
+            apiTest.innerHTML = results.join('');
+        }
+        
+        // اختبار الوظائف المساعدة
+        function testUtils() {
+            const utilsTest = document.getElementById('utils-test');
+            let results = [];
+            
+            if (typeof PharmacyUtils !== 'undefined') {
+                // اختبار بعض الوظائف
+                const methods = ['formatDate', 'validateEmail', 'showAlert'];
+                methods.forEach(method => {
+                    if (typeof PharmacyUtils[method] === 'function') {
+                        results.push(`<div class="test-result test-success"><i class="fas fa-check"></i> وظيفة ${method} متوفرة</div>`);
+                    } else {
+                        results.push(`<div class="test-result test-error"><i class="fas fa-times"></i> وظيفة ${method} غير متوفرة</div>`);
+                    }
+                });
+                
+                // اختبار وظيفة formatDate
+                try {
+                    const testDate = PharmacyUtils.formatDate(new Date());
+                    if (testDate) {
+                        results.push('<div class="test-result test-success"><i class="fas fa-check"></i> اختبار formatDate نجح: ' + testDate + '</div>');
+                    }
+                } catch (e) {
+                    results.push('<div class="test-result test-error"><i class="fas fa-times"></i> خطأ في formatDate: ' + e.message + '</div>');
+                }
+            } else {
+                results.push('<div class="test-result test-error"><i class="fas fa-times"></i> PharmacyUtils غير متوفر</div>');
+            }
+            
+            utilsTest.innerHTML = results.join('');
+        }
+        
+        // تشغيل جميع الاختبارات
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                testFiles();
+                testSupabase();
+                testAPI();
+                testUtils();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

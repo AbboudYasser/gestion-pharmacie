@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f9fa">
+    <title>إدارة الموردين - نظام إدارة الصيدلية</title>
+    
+    <!-- نفس ملفات CSS للحفاظ على تناسق التصميم -->
+    <link rel="icon" type="image/png" href="images/icon/phar_cfpa_gray.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    
+    <!-- يمكننا استخدام نفس ملف produits.css لأنه يحتوي على تصميم الجداول والنوافذ -->
+    <link rel="stylesheet" href="css/produits.css"> 
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- الشريط العلوي (Header ) -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-pills"></i>
+                <h1>نظام إدارة الصيدلية</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- الشريط الجانبي (Sidebar) -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>لوحة التحكم</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="prescriptions">
+                            <i class="fas fa-file-prescription"></i>
+                            <span>الوصفات الطبية</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="patients.html" class="nav-link">
+                        <i class="fas fa-user-injured"></i>
+                        <span>إدارة المرضى</span>
+                      </a>
+                    </li>                    
+                    <li class="nav-item">
+                        <a href="stock.html" class="nav-link" data-section="inventory">
+                            <i class="fas fa-boxes"></i>
+                            <span>إدارة المخزون</span>
+                        </a>
+                    </li>                  
+                    <li class="nav-item active">
+                        <a href="fournisseurs.html" class="nav-link" data-section="suppliers">
+                            <i class="fas fa-truck"></i>
+                            <span>الموردين</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="reports">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>التقارير</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="users">
+                            <i class="fas fa-users"></i>
+                            <span>إدارة المستخدمين</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="messages">
+                            <i class="fas fa-comments"></i>
+                            <span>الرسائل</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي للصفحة -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1><i class="fas fa-truck"></i> إدارة الموردين</h1>
+                    <p>عرض وإدارة بيانات الموردين المتعامل معهم.</p>
+                </div>
+                <div class="page-actions">
+                    <button id="add-supplier-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        إضافة مورد جديد
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>اسم المورد</th>
+                                <th>العنوان</th>
+                                <th>رقم الهاتف</th>
+                                <th>اسم جهة الاتصال</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliers-table-body">
+                            <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- هنا سنضيف نوافذ الحذف والإضافة لاحقًا -->
+    <!-- نافذة تأكيد الحذف -->
+    <div id="delete-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>تأكيد الحذف</h3>
+            <p>هل أنت متأكد من أنك تريد حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            <div class="modal-actions">
+                <button id="cancel-delete-btn" class="btn btn-secondary">إلغاء</button>
+                <button id="confirm-delete-btn" class="btn btn-danger">نعم، قم بالحذف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة/تعديل مورد -->
+    <div id="supplier-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title">إضافة مورد جديد</h3>
+            <form id="supplier-form">
+                <div class="form-group">
+                    <label for="cod_four">معرف المورد (COD_FOUR)</label>
+                    <input type="text" id="cod_four" required>
+                </div>
+                <div class="form-group">
+                    <label for="nom_four">اسم المورد</label>
+                    <input type="text" id="nom_four" required>
+                </div>
+                <div class="form-group">
+                    <label for="adres_four">العنوان</label>
+                    <input type="text" id="adres_four">
+                </div>
+                <div class="form-group">
+                    <label for="num_tel_four">رقم الهاتف</label>
+                    <input type="text" id="num_tel_four">
+                </div>
+                <div class="form-group">
+                    <label for="nom_comp_four">اسم جهة الاتصال</label>
+                    <input type="text" id="nom_comp_four">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-supplier-btn" class="btn btn-secondary">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- السكريبتات المطلوبة -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/fournisseurs.js"></script> <!-- ملف JS الخاص بهذه الصفحة -->
+</body>
+</html>

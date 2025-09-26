@@ -1,20 +1,22 @@
 
 document.addEventListener("DOMContentLoaded", async function() {
+    // الحصول على بيانات المستخدم الحالي من التخزين المحلي
+    const currentUser = PharmacyAPI.getCurrentUser();
     
+    // التحقق من تسجيل الدخول
+    if (!currentUser.id || !currentUser.role) {
+        // إعادة توجيه إلى صفحة تسجيل الدخول إذا لم يكن المستخدم مسجل الدخول
+        window.location.href = 'login.html';
+        return;
+    }
     
-    
-     
-   
-    
-   
-    
-    
+    // تحديث معلومات المستخدم في الواجهة
     updateUserInfo(currentUser);
     
-    
+    // تحميل بيانات لوحة التحكم
     await loadDashboardData();
     
-    
+    // إعداد مستمعي الأحداث
     setupEventListeners();
 });
 
@@ -79,22 +81,25 @@ function adjustUIForUserRole(role) {
 
 async function loadDashboardData() {
     try {
-        
+        // تحميل إحصائيات لوحة التحكم
         const dashboardStats = await PharmacyAPI.getDashboardStats();
+        if (dashboardStats.success) {
+            updateDashboardStats(dashboardStats.data);
+        }
         
-        updateDashboardStats(dashboardStats.data);
-        
-        
+        // تحميل الوصفات المعلقة
         const prescriptions = await PharmacyAPI.getPrescriptions({ status: "معلقة" });
+        if (prescriptions.success) {
+            updatePendingPrescriptions(prescriptions.data || []);
+        }
         
-        updatePendingPrescriptions(prescriptions.data);
-        
-        
+        // تحميل عناصر المخزون المنخفض
         const lowStockItems = await PharmacyAPI.getLowStockItems();
+        if (lowStockItems.success) {
+            updateLowStockItems(lowStockItems.data || []);
+        }
         
-        updateLowStockItems(lowStockItems.data);
-        
-        
+        // عرض الأدوية الأكثر طلباً (بيانات تجريبية)
         updatePopularMedications([
             { name: "باراسيتامول 500mg", requests: 45 },
             { name: "أموكسيسيلين 250mg", requests: 32 },

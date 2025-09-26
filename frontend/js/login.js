@@ -23,13 +23,16 @@ async function handleForgotPasswordRequest(e) {
     }
     showLoading(true, 'loginBtn');
     try {
-        const { data: user, error } = await supabaseClient.from('users').select('id, password, prenom, nom').eq('email', email).single();
-        if (error || !user) throw new Error("لا يوجد حساب مرتبط بهذا البريد الإلكتروني.");
-        if (user.password !== null) {
-            throw new Error("هذا الحساب لديه كلمة مرور بالفعل.");
+        // استخدام API الجديد للتحقق من وجود المستخدم
+        const result = await PharmacyAPI.checkUserExists(email);
+        
+        if (!result.success) {
+            throw new Error(result.error);
         }
+        
+        const userData = result.data;
         userEmailForSetup = email;
-        const fullName = `${user.prenom} ${user.nom}`;
+        const fullName = `${userData.prenom} ${userData.nom}`;
         await sendOTP(email, fullName);
         showAlert(`تم إرسال رمز التحقق إلى ${email}.`, "success");
         updateView('setupPassword');
@@ -63,11 +66,12 @@ async function handleSetupPassword(e) {
         if (newPassword.length < 8) throw new Error("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
         if (newPassword !== confirmPassword) throw new Error("كلمتا المرور غير متطابقتين.");
         
-        // الآن bcrypt سيكون متاحًا بالتأكيد بفضل 'defer'
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        // استخدام API الجديد لتعيين كلمة المرور
+        const result = await PharmacyAPI.setPassword(userEmailForSetup, newPassword);
         
-        const { error } = await supabaseClient.from('users').update({ password: hashedPassword }).eq('email', userEmailForSetup);
-        if (error) throw error;
+        if (!result.success) {
+            throw new Error(result.error);
+        }
         
         showAlert("تم تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول.", "success");
         generatedOTP = null;
@@ -88,19 +92,25 @@ async function handleLogin(e) {
     showLoading(true, 'loginBtn');
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    
     try {
-        const { data: user, error } = await supabaseClient.from('users').select('id, password, role').eq('email', email).single();
-        if (error || !user) throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
-        if (user.password === null) throw new Error("ليس لديك كلمة مرور. استخدم 'كلمة مرور جديدة؟'.");
+        // استخدام API الجديد لتسجيل الدخول
+        const result = await PharmacyAPI.login(email, password);
         
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+        if (!result.success) {
+            throw new Error(result.error);
+        }
         
-        localStorage.setItem('userRole', user.role);
-        localStorage.setItem('userId', user.id);
+        const userData = result.data;
+        
+        // حفظ بيانات المستخدم في التخزين المحلي
+        localStorage.setItem('userRole', userData.userRole);
+        localStorage.setItem('userId', userData.userId);
+        localStorage.setItem('userName', userData.userName);
         
         showAlert("تم تسجيل الدخول بنجاح. جاري توجيهك...", "success");
-        setTimeout(() => redirectUser(user.role), 1500);
+        setTimeout(() => redirectUser(userData.userRole), 1500);
+        
     } catch (error) {
         showAlert(error.message, "danger");
     } finally {

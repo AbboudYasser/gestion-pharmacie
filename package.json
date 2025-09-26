@@ -1,7 +1,37 @@
 {
+  "name": "gestion-pharmacie",
+  "version": "1.0.0",
+  "description": "نظام إدارة الصيدلية للمستشفيات الحكومية في الجزائر",
+  "main": "frontend/index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000 --directory frontend",
+    "serve": "npx serve frontend",
+    "test": "echo \"افتح test.html في المتصفح لاختبار النظام\"",
+    "deploy-functions": "supabase functions deploy"
+  },
+  "keywords": [
+    "pharmacy",
+    "hospital",
+    "management",
+    "algeria",
+    "supabase",
+    "javascript"
+  ],
+  "author": "AbboudYasser",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "bcryptjs": "^2.4.3"
+  },
   "devDependencies": {
-    "glob": "^11.0.3",
-    "strip-comments": "^2.0.1",
-    "supabase": "^2.40.7"
-  }
+    "serve": "^14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AbboudYasser/gestion-pharmacie.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AbboudYasser/gestion-pharmacie/issues"
+  },
+  "homepage": "https://github.com/AbboudYasser/gestion-pharmacie#readme"
 }

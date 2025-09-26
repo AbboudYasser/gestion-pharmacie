@@ -5,46 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المخزون - نظام إدارة الصيدلية</title>
     
-    <!-- ملفات CSS الأساسية من تصميمك -->
-     <link rel="icon" type="image/png" href="images/icon/phar_cfpa_gray.png">
+    <!-- ملفات CSS الأساسية -->
+    <link rel="icon" type="image/png" href="images/icon/phar_cfpa_gray.png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/components.css">
-    
-    <!-- ملف CSS الجديد والمخصص لهذه الصفحة -->
     <link rel="stylesheet" href="css/stock.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- الشريط العلوي (Header ) -->
+    <!-- الشريط العلوي -->
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
                 <i class="fas fa-pills"></i>
                 <h1>نظام إدارة الصيدلية</h1>
             </div>
+            
             <div class="header-actions">
-                <!-- يمكنك إضافة أزرار الإشعارات والمستخدم هنا لاحقًا -->
+                <div class="notifications">
+                    <button class="notification-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">2</span>
+                    </button>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="user-name">صيدلي</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            الملف الشخصي
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            الإعدادات
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            تسجيل الخروج
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
     <div class="main-container">
-        <!-- الشريط الجانبي (Sidebar) -->
-                <!-- الشريط الجانبي -->
+        <!-- الشريط الجانبي -->
         <aside class="sidebar" id="sidebar">
             <nav class="sidebar-nav">
                 <ul class="nav-list">
-                </ul>
-              </nav>
-            </aside>
-            
-            <aside class="sidebar" id="sidebar">
-              <nav class="sidebar-nav">
-                <ul class="nav-list">
-                  <!-- يمكنك إضافة روابط الصفحات الأخرى هنا -->
                     <li class="nav-item">
                         <a href="dashboard.html" class="nav-link">
                             <i class="fas fa-tachometer-alt"></i>
@@ -52,43 +70,25 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="fas fa-file-prescription"></i>
-                            <span>الوصفات الطبية</span>
+                        <a href="stock.html" class="nav-link active">
+                            <i class="fas fa-boxes"></i>
+                            <span>إدارة المخزون</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                      <a href="patients.html" class="nav-link">
-                        <i class="fas fa-user-injured"></i>
-                        <span>إدارة المرضى</span>
-                      </a>
-                    </li>
-                    <li class="nav-item active">
-                      <a href="stock.html" class="nav-link">
-                        <i class="fas fa-boxes"></i>
-                        <span>إدارة المخزون</span>
-                      </a>
+                        <a href="patients.html" class="nav-link">
+                            <i class="fas fa-user-injured"></i>
+                            <span>إدارة المرضى</span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="fournisseurs.html" class="nav-link">
                             <i class="fas fa-truck"></i>
-                            <span>الموردين</span>
+                            <span>إدارة الموردين</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="purchase-orders.html" class="nav-link">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>طلبات الشراء</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>التقارير</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="users.html" class="nav-link">
                             <i class="fas fa-users"></i>
                             <span>إدارة المستخدمين</span>
                         </a>
@@ -97,94 +97,219 @@
             </nav>
         </aside>
 
-        <!-- المحتوى الرئيسي للصفحة -->
+        <!-- المحتوى الرئيسي -->
         <main class="main-content">
             <div class="page-header">
                 <div class="page-title">
-                    <h1><i class="fas fa-boxes"></i>إدارة المخزون</h1>
-                    <p>عرض، إضافة، تعديل، وحذف جميع المنتجات في المخزون.</p>
+                    <h1><i class="fas fa-boxes"></i> إدارة المخزون</h1>
+                    <p>إدارة وتتبع مخزون الأدوية والمستلزمات الطبية</p>
                 </div>
                 <div class="page-actions">
-                    <button id="add-product-btn" class="btn">
+                    <button class="btn btn-primary" id="add-medication-btn">
                         <i class="fas fa-plus"></i>
-                        إضافة منتج جديد
+                        إضافة دواء جديد
+                    </button>
+                    <button class="btn btn-secondary" id="export-btn">
+                        <i class="fas fa-download"></i>
+                        تصدير البيانات
                     </button>
                 </div>
             </div>
 
-            <div class="table-container">
-                <div class="table-wrapper">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>اسم المنتج</th>
-                                <th>السعر (د.ج)</th>
-                                <th>الكمية</th>
-                                <th>النوع</th>
-                                <th>إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="products-table-body">
-                            <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
-                        </tbody>
-                    </table>
+            <!-- إحصائيات سريعة -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-medications">245</h3>
+                        <p>إجمالي الأدوية</p>
+                    </div>
                 </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="low-stock-count">15</h3>
+                        <p>مخزون منخفض</p>
+                    </div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="expired-soon-count">3</h3>
+                        <p>ينتهي قريباً</p>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="available-count">227</h3>
+                        <p>متوفر</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أدوات البحث والفلترة -->
+            <div class="search-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="البحث عن دواء...">
+                </div>
+                <div class="filters">
+                    <select id="category-filter">
+                        <option value="">جميع الفئات</option>
+                        <option value="مسكنات">مسكنات</option>
+                        <option value="مضادات حيوية">مضادات حيوية</option>
+                        <option value="أدوية القلب">أدوية القلب</option>
+                        <option value="أدوية السكري">أدوية السكري</option>
+                    </select>
+                    <select id="status-filter">
+                        <option value="">جميع الحالات</option>
+                        <option value="متوفر">متوفر</option>
+                        <option value="مخزون منخفض">مخزون منخفض</option>
+                        <option value="نفد المخزون">نفد المخزون</option>
+                        <option value="منتهي الصلاحية">منتهي الصلاحية</option>
+                    </select>
+                    <button class="btn btn-outline" id="clear-filters">
+                        <i class="fas fa-times"></i>
+                        مسح الفلاتر
+                    </button>
+                </div>
+            </div>
+
+            <!-- جدول المخزون -->
+            <div class="table-container">
+                <table class="data-table" id="medications-table">
+                    <thead>
+                        <tr>
+                            <th>الكود</th>
+                            <th>اسم الدواء</th>
+                            <th>الفئة</th>
+                            <th>الكمية المتوفرة</th>
+                            <th>الوحدة</th>
+                            <th>تاريخ الانتهاء</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medications-tbody">
+                        <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- رسالة عدم وجود بيانات -->
+            <div class="no-data" id="no-data" style="display: none;">
+                <i class="fas fa-box-open"></i>
+                <h3>لا توجد أدوية</h3>
+                <p>لم يتم العثور على أي أدوية تطابق معايير البحث</p>
             </div>
         </main>
     </div>
 
-    <!-- نافذة تأكيد الحذف -->
-    <div id="delete-confirm-modal" class="modal-overlay">
+    <!-- نافذة إضافة/تعديل دواء -->
+    <div class="modal" id="medication-modal">
         <div class="modal-content">
-            <h3>تأكيد الحذف</h3>
-            <p>هل أنت متأكد من أنك تريد حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.</p>
-            <div class="modal-actions">
-                <button id="cancel-delete-btn" class="btn btn-secondary">إلغاء</button>
-                <button id="confirm-delete-btn" class="btn btn-danger">نعم، قم بالحذف</button>
+            <div class="modal-header">
+                <h2 id="modal-title">إضافة دواء جديد</h2>
+                <button class="modal-close" id="close-modal">&times;</button>
             </div>
-        </div>
-    </div>
-
-    <!-- نافذة إضافة/تعديل منتج -->
-    <div id="product-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="modal-title">إضافة منتج جديد</h3>
-            <form id="product-form">
-                <div class="form-group">
-                    <label for="ref_prod">معرف المنتج (REF_PROD)</label>
-                    <input type="text" id="ref_prod" required>
+            <form id="medication-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medication-code">كود الدواء *</label>
+                        <input type="text" id="medication-code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="medication-name">اسم الدواء *</label>
+                        <input type="text" id="medication-name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medication-category">الفئة *</label>
+                        <select id="medication-category" required>
+                            <option value="">اختر الفئة</option>
+                            <option value="مسكنات">مسكنات</option>
+                            <option value="مضادات حيوية">مضادات حيوية</option>
+                            <option value="أدوية القلب">أدوية القلب</option>
+                            <option value="أدوية السكري">أدوية السكري</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="medication-unit">الوحدة *</label>
+                        <select id="medication-unit" required>
+                            <option value="">اختر الوحدة</option>
+                            <option value="علبة">علبة</option>
+                            <option value="قرص">قرص</option>
+                            <option value="أمبولة">أمبولة</option>
+                            <option value="زجاجة">زجاجة</option>
+                            <option value="أنبوب">أنبوب</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medication-quantity">الكمية *</label>
+                        <input type="number" id="medication-quantity" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="medication-min-stock">الحد الأدنى للمخزون</label>
+                        <input type="number" id="medication-min-stock" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medication-expiry">تاريخ الانتهاء</label>
+                        <input type="date" id="medication-expiry">
+                    </div>
+                    <div class="form-group">
+                        <label for="medication-supplier">المورد</label>
+                        <input type="text" id="medication-supplier">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="desig_prod">اسم المنتج</label>
-                    <input type="text" id="desig_prod" required>
-                </div>
-                <div class="form-group">
-                    <label for="p_u">السعر (د.ج)</label>
-                    <input type="number" id="p_u" required step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="qte_stc">الكمية في المخزون</label>
-                    <input type="number" id="qte_stc" required>
-                </div>
-                <div class="form-group">
-                    <label for="typ_prod">نوع المنتج</label>
-                    <input type="text" id="typ_prod" required>
-                </div>
-                <div class="form-group">
-                    <label for="num_mag">معرف المخزن</label>
-                    <input type="text" id="num_mag" value="MAIN-MAG" required>
+                    <label for="medication-description">الوصف</label>
+                    <textarea id="medication-description" rows="3"></textarea>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" id="cancel-product-btn" class="btn btn-secondary">إلغاء</button>
+                    <button type="button" id="cancel-btn" class="btn btn-secondary">إلغاء</button>
                     <button type="submit" class="btn btn-primary">حفظ</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- نافذة تأكيد الحذف -->
+    <div class="modal" id="delete-modal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2>تأكيد الحذف</h2>
+                <button class="modal-close" id="close-delete-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من حذف هذا الدواء؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="cancel-delete-btn" class="btn btn-secondary">إلغاء</button>
+                <button type="button" id="confirm-delete-btn" class="btn btn-danger">حذف</button>
+            </div>
+        </div>
+    </div>
+
     <!-- السكريبتات المطلوبة -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/stock.js"></script>
 </body>
 </html>
