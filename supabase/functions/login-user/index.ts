@@ -4,7 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { handleOptions } from "../_shared/cors.ts";
 import { createSupabaseAdmin, createErrorResponse, createSuccessResponse, validateEmail, handleError } from "../_shared/utils.ts";
-import * as bcrypt from "https://esm.sh/bcryptjs@2.4.3";
+import { compare } from "https://esm.sh/bcryptjs@2.4.3";
 
 serve(async (req) => {
   // التعامل مع طلبات OPTIONS
@@ -46,7 +46,7 @@ serve(async (req) => {
     }
 
     // التحقق من صحة كلمة المرور
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await compare(password, user.password);
     if (!passwordMatch) {
       throw new Error("بيانات الاعتماد غير صحيحة.");
     }

@@ -4,7 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { handleOptions } from "../_shared/cors.ts";
 import { createSupabaseAdmin, createErrorResponse, createSuccessResponse, validateEmail, validatePassword, handleError } from "../_shared/utils.ts";
-import * as bcrypt from "https://esm.sh/bcryptjs@2.4.3";
+import { hash } from "https://esm.sh/bcryptjs@2.4.3";
 
 serve(async (req) => {
   // التعامل مع طلبات OPTIONS
@@ -34,7 +34,7 @@ serve(async (req) => {
     const supabaseAdmin = createSupabaseAdmin();
 
     // تشفير كلمة المرور الجديدة
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await hash(newPassword, 10);
     
     // تحديث كلمة المرور في قاعدة البيانات
     const { error: updateError } = await supabaseAdmin
